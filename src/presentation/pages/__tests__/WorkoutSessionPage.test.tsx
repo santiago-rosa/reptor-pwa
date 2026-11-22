@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { WorkoutSessionPage, formatTimer } from '../WorkoutSessionPage'
 import { useWorkoutSessionStore } from '../../stores/workoutSessionStore'
@@ -269,5 +269,108 @@ describe('WorkoutSessionPage', () => {
     fireEvent.click(addExerciseBtn)
 
     expect(mockNavigate).toHaveBeenCalledWith('/exercises/pick?mode=session')
+  })
+
+  it('finishes workout immediately and navigates to /history when all sets are completed', async () => {
+    // baseSession has 1 completed set
+    const mockFinish = vi.fn().mockResolvedValue(baseSession)
+    useWorkoutSessionStore.setState({
+      activeSession: baseSession,
+      finishSession: mockFinish,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const finishBtn = screen.getByRole('button', { name: /^finish$/i })
+    fireEvent.click(finishBtn)
+
+    await waitFor(() => {
+      expect(mockFinish).toHaveBeenCalled()
+      expect(mockNavigate).toHaveBeenCalledWith('/history')
+    })
+  })
+
+  it('shows warning when incomplete sets exist, and finishes on confirm', async () => {
+    const sessionWithIncomplete: WorkoutSession = {
+      ...baseSession,
+      exercises: [
+        {
+          ...baseSession.exercises[0]!,
+          sets: [
+            {
+              id: 'set-1',
+              sessionExerciseId: 'se-1',
+              setNumber: 1,
+              weightKg: 80,
+              reps: 8,
+              isCompleted: false, // Incomplete!
+            },
+          ],
+        },
+      ],
+    }
+
+    const mockFinish = vi.fn().mockResolvedValue(sessionWithIncomplete)
+    useWorkoutSessionStore.setState({
+      activeSession: sessionWithIncomplete,
+      finishSession: mockFinish,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const finishBtn = screen.getByRole('button', { name: /^finish$/i })
+    fireEvent.click(finishBtn)
+
+    expect(screen.getByText('Incomplete Sets')).toBeInTheDocument()
+    expect(screen.getByText(/you have 1 uncompleted set/i)).toBeInTheDocument()
+
+    // Test cancelling warning
+    const cancelBtn = screen.getByRole('button', { name: /back to workout/i })
+    fireEvent.click(cancelBtn)
+    expect(screen.queryByText('Incomplete Sets')).not.toBeInTheDocument()
+    expect(mockFinish).not.toHaveBeenCalled()
+
+    // Open again and confirm
+    fireEvent.click(finishBtn)
+    const confirmFinishBtn = screen.getByRole('button', { name: /finish anyway/i })
+    fireEvent.click(confirmFinishBtn)
+
+    await waitFor(() => {
+      expect(mockFinish).toHaveBeenCalled()
+      expect(mockNavigate).toHaveBeenCalledWith('/history')
+    })
+  })
+
+  it('displays error message when finishSession fails', async () => {
+    const mockFinish = vi.fn().mockRejectedValue(new Error('Network error saving session'))
+    useWorkoutSessionStore.setState({
+      activeSession: baseSession,
+      finishSession: mockFinish,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const finishBtn = screen.getByRole('button', { name: /^finish$/i })
+    fireEvent.click(finishBtn)
+
+    expect(await screen.findByText('Network error saving session')).toBeInTheDocument()
   })
 })

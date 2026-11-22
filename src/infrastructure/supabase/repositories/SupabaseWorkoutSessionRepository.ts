@@ -67,11 +67,11 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
 
     // 2. Batch upsert exercises
     if (session.exercises.length > 0) {
-      const exerciseRows = session.exercises.map((se) => ({
+      const exerciseRows = session.exercises.map((se, exIdx) => ({
         id: se.id || crypto.randomUUID(),
         session_id: session.id,
         exercise_id: se.exerciseId,
-        order_index: se.orderIndex,
+        order_index: se.orderIndex ?? exIdx,
       }))
 
       const { error: exerciseError } = await this.client

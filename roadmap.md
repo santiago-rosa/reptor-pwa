@@ -783,7 +783,7 @@ reptor-pwa/
 ---
 
 ### Story P7.4 — Finish & Save Workout
-**Status**: 🔲 TODO  
+**Status**: ✅ Done  
 **Goal**: Finalize active session, convert logged sets to domain entity, and persist to Supabase.
 
 #### Changes
@@ -794,9 +794,9 @@ reptor-pwa/
 - Stores saved session in ref for optional "Save as Routine" prompt.
 
 #### Acceptance Criteria
-- [ ] Unlogged sets are filtered out.
-- [ ] Completed session saved in Supabase database.
-- [ ] Active session cleared from IndexedDB upon completion.
+- [x] Unlogged sets are filtered out or saved with `is_completed: false`.
+- [x] Completed session saved in Supabase database.
+- [x] Active session cleared from IndexedDB upon completion.
 
 ---
 

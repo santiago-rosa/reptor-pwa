@@ -1,6 +1,6 @@
 # Reptor PWA — Implementation Progress
 
-Overall Progress: **28 / 37 stories completed** (75.7%)
+Overall Progress: **29 / 37 stories completed** (78.4%)
 
 ---
 
@@ -85,7 +85,8 @@ Overall Progress: **28 / 37 stories completed** (75.7%)
   - *Completed*: Created `SessionSetRow` (weight & reps inputs, set number, completion check button with prominent emerald styling) and `SessionExerciseCard` (header with completed sets tally, column headers, "+ Add Set", and "Remove last set" buttons). Wired into `WorkoutSessionPage` with real-time reactive store updates. Comprehensive unit and component tests written and passing.
 - [x] **Story P7.3 — Add Exercise Mid-Session**
   - *Completed*: Wired `+ Add Exercise` button in `WorkoutSessionPage` (both in active session and empty session) directing to `/exercises/pick?mode=session`. Added duplicate prevention in `workoutSessionStore` and UI disabled state in `ExercisePickerPage`. Successfully appends exercise with initial set row immediately. Tests written and passing.
-- [ ] **Story P7.4 — Finish & Save Workout**
+- [x] **Story P7.4 — Finish & Save Workout**
+  - *Completed*: Added "Finish" action to header and bottom of `WorkoutSessionPage`. Added warning confirmation modal when incomplete sets remain ("Finish Anyway" vs "Back to Workout"), saving spinner state, immediate submission via `useWorkoutSessionStore.finishSession()`, error banner handling, and automatic navigation to `/history`. Unit and component tests written and passing.
 - [ ] **Story P7.5 — Save Session as Routine Modal**
 
 ---

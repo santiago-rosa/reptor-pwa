@@ -26,8 +26,14 @@ export function WorkoutSessionPage() {
   const toggleSetLogged = useWorkoutSessionStore((s) => s.toggleSetLogged)
   const addSet = useWorkoutSessionStore((s) => s.addSet)
   const removeLastSet = useWorkoutSessionStore((s) => s.removeLastSet)
+  const finishSession = useWorkoutSessionStore((s) => s.finishSession)
+  const isSaving = useWorkoutSessionStore((s) => s.isSaving)
+  const sessionError = useWorkoutSessionStore((s) => s.error)
 
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+  const [showIncompleteWarning, setShowIncompleteWarning] = useState(false)
+  const [localError, setLocalError] = useState<string | null>(null)
+
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
     if (!activeSession?.startedAt) return 0
     const start = new Date(activeSession.startedAt).getTime()
@@ -66,6 +72,32 @@ export function WorkoutSessionPage() {
     navigate('/routines', { replace: true })
   }
 
+  const incompleteSetsCount = activeSession.exercises.reduce(
+    (acc, ex) => acc + ex.sets.filter((s) => !s.isCompleted).length,
+    0
+  )
+
+  const handleFinishClick = () => {
+    if (incompleteSetsCount > 0) {
+      setShowIncompleteWarning(true)
+    } else {
+      executeFinish()
+    }
+  }
+
+  const executeFinish = async () => {
+    setShowIncompleteWarning(false)
+    setLocalError(null)
+    try {
+      await finishSession()
+      navigate('/history')
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : 'Failed to save workout session')
+    }
+  }
+
+  const displayedError = localError || sessionError
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-950 text-white pb-24">
       {/* Sticky Header */}
@@ -98,16 +130,45 @@ export function WorkoutSessionPage() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
+            disabled={isSaving}
             onClick={() => setShowDiscardConfirm(true)}
-            className="rounded-lg border border-red-900/40 bg-red-950/20 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-900/40 hover:text-red-300 transition"
+            className="rounded-lg border border-red-900/40 bg-red-950/20 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-900/40 hover:text-red-300 disabled:opacity-50 transition"
           >
             Discard
+          </button>
+          <button
+            type="button"
+            disabled={isSaving}
+            onClick={handleFinishClick}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-emerald-600/20 active:scale-95 disabled:opacity-50 transition"
+          >
+            {isSaving ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              'Finish'
+            )}
           </button>
         </div>
       </header>
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-md w-full mx-auto px-4 py-4 space-y-4">
+        {displayedError && (
+          <div className="rounded-xl border border-red-900/50 bg-red-950/40 p-3 text-xs text-red-300 flex items-center justify-between">
+            <span>{displayedError}</span>
+            <button
+              type="button"
+              onClick={() => setLocalError(null)}
+              className="text-xs text-red-400 hover:text-white underline ml-2 shrink-0"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         {activeSession.exercises.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-800 p-8 text-center space-y-3 mt-6">
             <p className="text-sm text-gray-400">No exercises in this session.</p>
@@ -139,9 +200,56 @@ export function WorkoutSessionPage() {
             >
               + Add Exercise
             </button>
+
+            {/* Bottom Finish Workout Button */}
+            <div className="pt-2">
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={handleFinishClick}
+                className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm text-center shadow-lg shadow-emerald-600/20 transition active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Saving Workout...</span>
+                  </>
+                ) : (
+                  'Finish Workout'
+                )}
+              </button>
+            </div>
           </div>
         )}
       </main>
+
+      {/* Incomplete Sets Warning Modal */}
+      {showIncompleteWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="w-full max-w-sm rounded-2xl border border-gray-800 bg-gray-900 p-5 shadow-xl space-y-3">
+            <h3 className="text-base font-semibold text-white">Incomplete Sets</h3>
+            <p className="text-xs text-gray-300">
+              You have {incompleteSetsCount} uncompleted {incompleteSetsCount === 1 ? 'set' : 'sets'}. Do you want to finish the workout anyway?
+            </p>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowIncompleteWarning(false)}
+                className="flex-1 rounded-xl bg-gray-800 py-2.5 text-xs font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition"
+              >
+                Back to Workout
+              </button>
+              <button
+                type="button"
+                onClick={executeFinish}
+                className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-xs font-semibold text-white hover:bg-emerald-500 transition"
+              >
+                Finish Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Discard Confirmation Modal */}
       {showDiscardConfirm && (
