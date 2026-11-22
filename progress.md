@@ -95,7 +95,8 @@ Overall Progress: **29 / 37 stories completed** (78.4%)
 ## Epic 8 — Workout History UI
 - [x] **Story P8.1 — Workout History List Page**
   - *Completed*: Created `GetWorkoutHistory` domain use case, `useWorkoutHistoryStore` (sorting newest first by `startedAt`), `SessionSummaryCard` (displaying formatted date, workout title, duration, total sets, total volume, and exercise list), and `WorkoutHistoryPage` with skeleton loader, error retry banner, empty state, and list navigation to `/history/:id`. Unit and component tests written and passing.
-- [ ] **Story P8.2 — Session Detail Page**
+- [x] **Story P8.2 — Session Detail Page**
+  - *Completed*: Created `GetWorkoutSession` domain usecase, added `fetchSessionById` and `selectedSession` in `workoutHistoryStore`, created `SessionDetailPage` at `/history/:id` (with back button, header metrics for duration, sets, volume, and detailed exercise cards showing set numbers, weights, reps, set volume, and completed/skipped statuses), and wired the route into `App.tsx`. Unit and component tests written and passing. Epic 8 is now 100% complete.
 
 ---
 

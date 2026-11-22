@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createWorkoutHistoryStore } from '../workoutHistoryStore'
 import { GetWorkoutHistory } from '@/domain/usecases/GetWorkoutHistory'
+import { GetWorkoutSession } from '@/domain/usecases/GetWorkoutSession'
 import type { IWorkoutSessionRepository } from '@/domain/repositories/IWorkoutSessionRepository'
 import type { WorkoutSession } from '@/domain/entities/WorkoutSession'
 
 describe('workoutHistoryStore', () => {
   let mockRepo: IWorkoutSessionRepository
   let getWorkoutHistory: GetWorkoutHistory
+  let getWorkoutSession: GetWorkoutSession
   let store: ReturnType<typeof createWorkoutHistoryStore>
 
   const sampleSessions: WorkoutSession[] = [
@@ -29,16 +31,21 @@ describe('workoutHistoryStore', () => {
   beforeEach(() => {
     mockRepo = {
       save: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockImplementation((id: string) => {
+        const found = sampleSessions.find((s) => s.id === id)
+        return Promise.resolve(found ?? null)
+      }),
       findAll: vi.fn().mockResolvedValue(sampleSessions),
     }
     getWorkoutHistory = new GetWorkoutHistory(mockRepo)
-    store = createWorkoutHistoryStore({ getWorkoutHistory })
+    getWorkoutSession = new GetWorkoutSession(mockRepo)
+    store = createWorkoutHistoryStore({ getWorkoutHistory, getWorkoutSession })
   })
 
   it('initializes with default empty state', () => {
     const state = store.getState()
     expect(state.sessions).toEqual([])
+    expect(state.selectedSession).toBeNull()
     expect(state.loading).toBe(false)
     expect(state.error).toBeNull()
   })
@@ -55,26 +62,28 @@ describe('workoutHistoryStore', () => {
     expect(state.sessions[1]?.id).toBe('session-old')
   })
 
-  it('does not refetch if sessions already exist unless force=true', async () => {
-    await store.getState().fetchSessions()
-    expect(mockRepo.findAll).toHaveBeenCalledTimes(1)
+  it('fetches single session by ID and updates selectedSession', async () => {
+    const session = await store.getState().fetchSessionById('session-new')
 
-    // Call again without force
-    await store.getState().fetchSessions(false)
-    expect(mockRepo.findAll).toHaveBeenCalledTimes(1)
-
-    // Call again with force=true
-    await store.getState().fetchSessions(true)
-    expect(mockRepo.findAll).toHaveBeenCalledTimes(2)
+    expect(session?.id).toBe('session-new')
+    expect(store.getState().selectedSession?.id).toBe('session-new')
+    expect(store.getState().loading).toBe(false)
   })
 
-  it('handles errors gracefully and updates error state', async () => {
-    mockRepo.findAll = vi.fn().mockRejectedValue(new Error('Network error'))
-    await store.getState().fetchSessions(true)
+  it('clears selectedSession when clearSelectedSession is called', async () => {
+    await store.getState().fetchSessionById('session-new')
+    expect(store.getState().selectedSession).not.toBeNull()
 
-    const state = store.getState()
-    expect(state.loading).toBe(false)
-    expect(state.error).toBe('Network error')
-    expect(state.sessions).toEqual([])
+    store.getState().clearSelectedSession()
+    expect(store.getState().selectedSession).toBeNull()
+  })
+
+  it('handles fetchSessionById error gracefully', async () => {
+    mockRepo.findById = vi.fn().mockRejectedValue(new Error('Failed to find'))
+    const session = await store.getState().fetchSessionById('error-id')
+
+    expect(session).toBeNull()
+    expect(store.getState().error).toBe('Failed to find')
+    expect(store.getState().loading).toBe(false)
   })
 })

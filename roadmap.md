@@ -836,7 +836,7 @@ reptor-pwa/
 ---
 
 ### Story P8.2 — Session Detail Page
-**Status**: 🔲 TODO  
+**Status**: ✅ Done  
 **Goal**: Build `/history/:id` showing breakdown of all exercises and logged weight/reps for that session.
 
 #### File
@@ -845,7 +845,7 @@ reptor-pwa/
   - Back button returning to history.
 
 #### Acceptance Criteria
-- [ ] Shows accurate weight, reps, and exercise breakdown.
+- [x] Shows accurate weight, reps, and exercise breakdown.
 
 ---
 
