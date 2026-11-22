@@ -769,7 +769,7 @@ reptor-pwa/
 ---
 
 ### Story P7.3 — Add Exercise Mid-Session
-**Status**: 🔲 TODO  
+**Status**: ✅ Done  
 **Goal**: Allow adding ad-hoc exercises to an ongoing workout.
 
 #### Changes
@@ -778,7 +778,7 @@ reptor-pwa/
 - Confirming appends new exercise to active session with initial set row.
 
 #### Acceptance Criteria
-- [ ] Mid-session added exercise renders in workout list immediately.
+- [x] Mid-session added exercise renders in workout list immediately.
 
 ---
 

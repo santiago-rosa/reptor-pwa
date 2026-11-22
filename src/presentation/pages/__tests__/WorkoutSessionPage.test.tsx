@@ -230,4 +230,44 @@ describe('WorkoutSessionPage', () => {
     expect(screen.queryByText('Discard Workout?')).not.toBeInTheDocument()
     expect(useWorkoutSessionStore.getState().activeSession).not.toBeNull()
   })
+
+  it('navigates to exercise picker in session mode when + Add Exercise is clicked', () => {
+    useWorkoutSessionStore.setState({ activeSession: baseSession })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const addExerciseBtn = screen.getByRole('button', { name: /\+ add exercise/i })
+    fireEvent.click(addExerciseBtn)
+
+    expect(mockNavigate).toHaveBeenCalledWith('/exercises/pick?mode=session')
+  })
+
+  it('renders empty session placeholder with Add Exercise button when session has 0 exercises', () => {
+    const emptySession: WorkoutSession = {
+      ...baseSession,
+      exercises: [],
+    }
+    useWorkoutSessionStore.setState({ activeSession: emptySession })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText('No exercises in this session.')).toBeInTheDocument()
+
+    const addExerciseBtn = screen.getByRole('button', { name: /\+ add exercise/i })
+    fireEvent.click(addExerciseBtn)
+
+    expect(mockNavigate).toHaveBeenCalledWith('/exercises/pick?mode=session')
+  })
 })

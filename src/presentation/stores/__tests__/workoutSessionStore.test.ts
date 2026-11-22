@@ -140,4 +140,18 @@ describe('useWorkoutSessionStore', () => {
     store.getState().discard()
     expect(store.getState().activeSession).toBeNull()
   })
+
+  it('prevents adding duplicate exercises to active session', () => {
+    store.getState().startEmpty('Morning Workout')
+    store.getState().addExercise({ id: 'ex-1', name: 'Deadlift' })
+    expect(store.getState().activeSession!.exercises).toHaveLength(1)
+
+    // Attempt to add same exercise
+    store.getState().addExercise({ id: 'ex-1', name: 'Deadlift' })
+    expect(store.getState().activeSession!.exercises).toHaveLength(1)
+
+    // Add different exercise
+    store.getState().addExercise({ id: 'ex-2', name: 'Squat' })
+    expect(store.getState().activeSession!.exercises).toHaveLength(2)
+  })
 })

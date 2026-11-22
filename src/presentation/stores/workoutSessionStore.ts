@@ -141,6 +141,9 @@ export const createWorkoutSessionStore = (
           set((state) => {
             if (!state.activeSession) return state
 
+            const exists = state.activeSession.exercises.some((e) => e.exerciseId === exercise.id)
+            if (exists) return state
+
             const sessionExerciseId = crypto.randomUUID()
             const initialSet: SessionSet = {
               id: crypto.randomUUID(),
