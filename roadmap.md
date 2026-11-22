@@ -731,7 +731,7 @@ reptor-pwa/
 ---
 
 ### Story P7.1 — Start Session & Timer Header
-**Status**: 🔲 TODO  
+**Status**: ✅ Done  
 **Goal**: Wire "Start" button from RoutineCard, setup `/session` page with real-time timer and discard flow.
 
 #### Files
@@ -741,8 +741,8 @@ reptor-pwa/
   - Discard shows confirm prompt, calls `sessionStore.discard()`.
 
 #### Acceptance Criteria
-- [ ] Starting routine populates session store and navigates to `/session`.
-- [ ] Timer ticks accurately every second from `startedAt`.
+- [x] Starting routine populates session store and navigates to `/session`.
+- [x] Timer ticks accurately every second from `startedAt`.
 
 ---
 
