@@ -1,6 +1,6 @@
 # Reptor PWA — Implementation Progress
 
-Overall Progress: **26 / 37 stories completed** (70.3%)
+Overall Progress: **27 / 37 stories completed** (73.0%)
 
 ---
 
@@ -81,7 +81,8 @@ Overall Progress: **26 / 37 stories completed** (70.3%)
 ## Epic 7 — Active Workout Session UI
 - [x] **Story P7.1 — Start Session & Timer Header**
   - *Completed*: Implemented `WorkoutSessionPage` at `/session` featuring full-screen mobile layout, session title, live elapsed timer formatted as `MM:SS` (or `HH:MM:SS`) ticking every second from `startedAt`, auto-redirect to `/routines` when no active session exists, and confirmation modal before discarding active workout. Unit and component tests written and passing.
-- [ ] **Story P7.2 — Log Sets UI (Exercise Card & Set Row)**
+- [x] **Story P7.2 — Log Sets UI (Exercise Card & Set Row)**
+  - *Completed*: Created `SessionSetRow` (weight & reps inputs, set number, completion check button with prominent emerald styling) and `SessionExerciseCard` (header with completed sets tally, column headers, "+ Add Set", and "Remove last set" buttons). Wired into `WorkoutSessionPage` with real-time reactive store updates. Comprehensive unit and component tests written and passing.
 - [ ] **Story P7.3 — Add Exercise Mid-Session**
 - [ ] **Story P7.4 — Finish & Save Workout**
 - [ ] **Story P7.5 — Save Session as Routine Modal**

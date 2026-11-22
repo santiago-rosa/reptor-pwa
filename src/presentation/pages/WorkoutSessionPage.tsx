@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWorkoutSessionStore } from '../stores/workoutSessionStore'
+import { SessionExerciseCard } from '../components/SessionExerciseCard'
 
 export function formatTimer(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600)
@@ -21,6 +22,10 @@ export function WorkoutSessionPage() {
   const navigate = useNavigate()
   const activeSession = useWorkoutSessionStore((s) => s.activeSession)
   const discard = useWorkoutSessionStore((s) => s.discard)
+  const updateSet = useWorkoutSessionStore((s) => s.updateSet)
+  const toggleSetLogged = useWorkoutSessionStore((s) => s.toggleSetLogged)
+  const addSet = useWorkoutSessionStore((s) => s.addSet)
+  const removeLastSet = useWorkoutSessionStore((s) => s.removeLastSet)
 
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
@@ -116,20 +121,15 @@ export function WorkoutSessionPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {activeSession.exercises.map((ex, idx) => (
-              <div
+            {activeSession.exercises.map((ex) => (
+              <SessionExerciseCard
                 key={ex.id}
-                className="rounded-2xl border border-gray-800 bg-gray-900/70 p-4 space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-sm text-white truncate">
-                    {idx + 1}. {ex.exerciseName}
-                  </h3>
-                  <span className="text-xs text-gray-400">
-                    {ex.sets.length} {ex.sets.length === 1 ? 'set' : 'sets'}
-                  </span>
-                </div>
-              </div>
+                exercise={ex}
+                onUpdateSet={(setNumber, data) => updateSet(ex.exerciseId, setNumber, data)}
+                onToggleSetLogged={(setNumber) => toggleSetLogged(ex.exerciseId, setNumber)}
+                onAddSet={() => addSet(ex.exerciseId)}
+                onRemoveLastSet={() => removeLastSet(ex.exerciseId)}
+              />
             ))}
 
             <button

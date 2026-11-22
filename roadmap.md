@@ -747,7 +747,7 @@ reptor-pwa/
 ---
 
 ### Story P7.2 — Log Sets UI (Exercise Card & Set Row)
-**Status**: 🔲 TODO  
+**Status**: ✅ Done  
 **Goal**: Build interactive set logging interface inside the active session.
 
 #### Files
@@ -763,8 +763,8 @@ reptor-pwa/
   - "Remove last set" button (visible when sets > 1)
 
 #### Acceptance Criteria
-- [ ] Input changes update session store immediately.
-- [ ] Logged sets show prominent green confirmation styling.
+- [x] Input changes update session store immediately.
+- [x] Logged sets show prominent green confirmation styling.
 
 ---
 

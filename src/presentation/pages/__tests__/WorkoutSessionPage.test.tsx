@@ -75,7 +75,7 @@ describe('WorkoutSessionPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/routines', { replace: true })
   })
 
-  it('renders active session title and live elapsed timer', () => {
+  it('renders active session title, live elapsed timer, and exercise cards', () => {
     useWorkoutSessionStore.setState({ activeSession: baseSession })
 
     render(
@@ -88,7 +88,8 @@ describe('WorkoutSessionPage', () => {
 
     expect(screen.getByText('Chest & Back Workout')).toBeInTheDocument()
     expect(screen.getByTestId('session-timer')).toHaveTextContent('02:05')
-    expect(screen.getByText(/1\. Bench Press/i)).toBeInTheDocument()
+    expect(screen.getByText('Bench Press')).toBeInTheDocument()
+    expect(screen.getByTestId('set-row-1')).toBeInTheDocument()
   })
 
   it('ticks timer forward every second', () => {
@@ -118,6 +119,70 @@ describe('WorkoutSessionPage', () => {
     })
 
     expect(screen.getByTestId('session-timer')).toHaveTextContent('00:05')
+  })
+
+  it('updates set weight and reps in the store when inputs change', () => {
+    useWorkoutSessionStore.setState({ activeSession: baseSession })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const weightInput = screen.getByLabelText(/set 1 weight/i)
+    fireEvent.change(weightInput, { target: { value: '90' } })
+
+    const repsInput = screen.getByLabelText(/set 1 reps/i)
+    fireEvent.change(repsInput, { target: { value: '10' } })
+
+    const updatedSet = useWorkoutSessionStore.getState().activeSession?.exercises[0]?.sets[0]
+    expect(updatedSet?.weightKg).toBe(90)
+    expect(updatedSet?.reps).toBe(10)
+  })
+
+  it('toggles set completion status in store when check button is clicked', () => {
+    useWorkoutSessionStore.setState({ activeSession: baseSession })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const checkBtn = screen.getByRole('button', { name: /toggle set 1 logged/i })
+    fireEvent.click(checkBtn)
+
+    const updatedSet = useWorkoutSessionStore.getState().activeSession?.exercises[0]?.sets[0]
+    expect(updatedSet?.isCompleted).toBe(false)
+  })
+
+  it('adds and removes sets via store actions', () => {
+    useWorkoutSessionStore.setState({ activeSession: baseSession })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const addSetBtn = screen.getByRole('button', { name: /add set/i })
+    fireEvent.click(addSetBtn)
+
+    expect(screen.getByTestId('set-row-2')).toBeInTheDocument()
+    expect(useWorkoutSessionStore.getState().activeSession?.exercises[0]?.sets).toHaveLength(2)
+
+    const removeBtn = screen.getByRole('button', { name: /remove last set/i })
+    fireEvent.click(removeBtn)
+
+    expect(screen.queryByTestId('set-row-2')).not.toBeInTheDocument()
+    expect(useWorkoutSessionStore.getState().activeSession?.exercises[0]?.sets).toHaveLength(1)
   })
 
   it('prompts confirmation when Discard is clicked and discards session on confirm', () => {
