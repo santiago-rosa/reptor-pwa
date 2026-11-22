@@ -271,11 +271,14 @@ describe('WorkoutSessionPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/exercises/pick?mode=session')
   })
 
-  it('finishes workout immediately and navigates to /history when all sets are completed', async () => {
-    // baseSession has 1 completed set
-    const mockFinish = vi.fn().mockResolvedValue(baseSession)
+  it('finishes routine-based workout immediately and navigates to /history when all sets are completed', async () => {
+    const routineSession: WorkoutSession = {
+      ...baseSession,
+      routineId: 'routine-123',
+    }
+    const mockFinish = vi.fn().mockResolvedValue(routineSession)
     useWorkoutSessionStore.setState({
-      activeSession: baseSession,
+      activeSession: routineSession,
       finishSession: mockFinish,
     })
 
@@ -299,6 +302,7 @@ describe('WorkoutSessionPage', () => {
   it('shows warning when incomplete sets exist, and finishes on confirm', async () => {
     const sessionWithIncomplete: WorkoutSession = {
       ...baseSession,
+      routineId: 'routine-123',
       exercises: [
         {
           ...baseSession.exercises[0]!,
@@ -351,6 +355,36 @@ describe('WorkoutSessionPage', () => {
       expect(mockFinish).toHaveBeenCalled()
       expect(mockNavigate).toHaveBeenCalledWith('/history')
     })
+  })
+
+  it('prompts SaveAsRoutineModal when ad-hoc workout (routineId = null) is finished and navigates to /history on Skip', async () => {
+    // baseSession has routineId: null (or undefined)
+    const mockFinish = vi.fn().mockResolvedValue(baseSession)
+    useWorkoutSessionStore.setState({
+      activeSession: baseSession,
+      finishSession: mockFinish,
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    const finishBtn = screen.getByRole('button', { name: /^finish$/i })
+    fireEvent.click(finishBtn)
+
+    await waitFor(() => {
+      expect(mockFinish).toHaveBeenCalled()
+      expect(screen.getByText('Save as Routine?')).toBeInTheDocument()
+    })
+
+    const skipBtn = screen.getByRole('button', { name: /skip/i })
+    fireEvent.click(skipBtn)
+
+    expect(mockNavigate).toHaveBeenCalledWith('/history')
   })
 
   it('displays error message when finishSession fails', async () => {

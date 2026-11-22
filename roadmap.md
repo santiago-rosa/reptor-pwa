@@ -801,7 +801,7 @@ reptor-pwa/
 ---
 
 ### Story P7.5 — Save Session as Routine Modal
-**Status**: 🔲 TODO  
+**Status**: ✅ Done  
 **Goal**: Allow user to save a completed workout as a reusable routine template.
 
 #### Files
@@ -811,8 +811,8 @@ reptor-pwa/
 - Wire flow in `WorkoutSessionPage` post-finish.
 
 #### Acceptance Criteria
-- [ ] Maps session exercises and set counts into a new routine.
-- [ ] "Skip" returns directly to `/routines`.
+- [x] Maps session exercises and set counts into a new routine.
+- [x] "Skip" returns directly to `/history`.
 
 ---
 
@@ -821,7 +821,7 @@ reptor-pwa/
 ---
 
 ### Story P8.1 — Workout History List Page
-**Status**: 🔲 TODO  
+**Status**: ✅ Done  
 **Goal**: Build `/history` showing all logged workouts ordered by date.
 
 #### Files
@@ -830,8 +830,8 @@ reptor-pwa/
 - `src/presentation/pages/WorkoutHistoryPage.tsx`
 
 #### Acceptance Criteria
-- [ ] Workouts sorted newest first.
-- [ ] Clicking a card navigates to `/history/:id`.
+- [x] Workouts sorted newest first.
+- [x] Clicking a card navigates to `/history/:id`.
 
 ---
 

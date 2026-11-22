@@ -87,12 +87,14 @@ Overall Progress: **29 / 37 stories completed** (78.4%)
   - *Completed*: Wired `+ Add Exercise` button in `WorkoutSessionPage` (both in active session and empty session) directing to `/exercises/pick?mode=session`. Added duplicate prevention in `workoutSessionStore` and UI disabled state in `ExercisePickerPage`. Successfully appends exercise with initial set row immediately. Tests written and passing.
 - [x] **Story P7.4 — Finish & Save Workout**
   - *Completed*: Added "Finish" action to header and bottom of `WorkoutSessionPage`. Added warning confirmation modal when incomplete sets remain ("Finish Anyway" vs "Back to Workout"), saving spinner state, immediate submission via `useWorkoutSessionStore.finishSession()`, error banner handling, and automatic navigation to `/history`. Unit and component tests written and passing.
-- [ ] **Story P7.5 — Save Session as Routine Modal**
+- [x] **Story P7.5 — Save Session as Routine Modal**
+  - *Completed*: Created `SaveAsRoutineModal` with routine name input, optional plan selection, exercise summary preview with set counts, min/max reps derivation from logged sets, and "Save Routine" / "Skip" actions. Integrated into `WorkoutSessionPage` upon completing ad-hoc workouts (sessions without a `routineId`). Full unit and integration tests written and passing. Epic 7 is now 100% complete.
 
 ---
 
 ## Epic 8 — Workout History UI
-- [ ] **Story P8.1 — Workout History List Page**
+- [x] **Story P8.1 — Workout History List Page**
+  - *Completed*: Created `GetWorkoutHistory` domain use case, `useWorkoutHistoryStore` (sorting newest first by `startedAt`), `SessionSummaryCard` (displaying formatted date, workout title, duration, total sets, total volume, and exercise list), and `WorkoutHistoryPage` with skeleton loader, error retry banner, empty state, and list navigation to `/history/:id`. Unit and component tests written and passing.
 - [ ] **Story P8.2 — Session Detail Page**
 
 ---

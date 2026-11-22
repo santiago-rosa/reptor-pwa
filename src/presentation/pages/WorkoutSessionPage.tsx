@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWorkoutSessionStore } from '../stores/workoutSessionStore'
 import { SessionExerciseCard } from '../components/SessionExerciseCard'
+import { SaveAsRoutineModal } from '../components/SaveAsRoutineModal'
+import type { WorkoutSession } from '@/domain/entities/WorkoutSession'
 
 export function formatTimer(totalSeconds: number): string {
   const hours = Math.floor(totalSeconds / 3600)
@@ -32,6 +34,7 @@ export function WorkoutSessionPage() {
 
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false)
+  const [completedSessionToSave, setCompletedSessionToSave] = useState<WorkoutSession | null>(null)
   const [localError, setLocalError] = useState<string | null>(null)
 
   const [elapsedSeconds, setElapsedSeconds] = useState(() => {
@@ -42,10 +45,10 @@ export function WorkoutSessionPage() {
 
   // Redirect to /routines if no active session
   useEffect(() => {
-    if (!activeSession) {
+    if (!activeSession && !completedSessionToSave) {
       navigate('/routines', { replace: true })
     }
-  }, [activeSession, navigate])
+  }, [activeSession, completedSessionToSave, navigate])
 
   // Live timer tick from startedAt
   useEffect(() => {
@@ -62,7 +65,9 @@ export function WorkoutSessionPage() {
     return () => clearInterval(interval)
   }, [activeSession?.startedAt])
 
-  if (!activeSession) {
+  const currentSession = activeSession || completedSessionToSave
+
+  if (!currentSession) {
     return null
   }
 
@@ -72,7 +77,7 @@ export function WorkoutSessionPage() {
     navigate('/routines', { replace: true })
   }
 
-  const incompleteSetsCount = activeSession.exercises.reduce(
+  const incompleteSetsCount = currentSession.exercises.reduce(
     (acc, ex) => acc + ex.sets.filter((s) => !s.isCompleted).length,
     0
   )
@@ -89,8 +94,12 @@ export function WorkoutSessionPage() {
     setShowIncompleteWarning(false)
     setLocalError(null)
     try {
-      await finishSession()
-      navigate('/history')
+      const saved = await finishSession()
+      if (!saved.routineId && saved.exercises.length > 0) {
+        setCompletedSessionToSave(saved)
+      } else {
+        navigate('/history')
+      }
     } catch (err) {
       setLocalError(err instanceof Error ? err.message : 'Failed to save workout session')
     }
@@ -103,7 +112,7 @@ export function WorkoutSessionPage() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-800 bg-gray-950/95 px-4 py-3 backdrop-blur">
         <div className="min-w-0 flex-1 pr-3">
-          <h1 className="truncate text-base font-bold text-white">{activeSession.title}</h1>
+          <h1 className="truncate text-base font-bold text-white">{currentSession.title}</h1>
           <div className="flex items-center gap-1.5 mt-0.5">
             <svg
               className="h-3.5 w-3.5 text-blue-400 animate-pulse"
@@ -169,7 +178,7 @@ export function WorkoutSessionPage() {
           </div>
         )}
 
-        {activeSession.exercises.length === 0 ? (
+        {currentSession.exercises.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-800 p-8 text-center space-y-3 mt-6">
             <p className="text-sm text-gray-400">No exercises in this session.</p>
             <button
@@ -182,7 +191,7 @@ export function WorkoutSessionPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {activeSession.exercises.map((ex) => (
+            {currentSession.exercises.map((ex) => (
               <SessionExerciseCard
                 key={ex.id}
                 exercise={ex}
@@ -278,6 +287,14 @@ export function WorkoutSessionPage() {
           </div>
         </div>
       )}
+
+      {/* Save Completed Workout as Routine Modal */}
+      <SaveAsRoutineModal
+        isOpen={completedSessionToSave !== null}
+        session={completedSessionToSave}
+        onClose={() => navigate('/history')}
+        onSaved={() => navigate('/history')}
+      />
     </div>
   )
 }
