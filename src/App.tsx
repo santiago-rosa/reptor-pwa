@@ -8,22 +8,32 @@ import { SessionDetailPage } from './presentation/pages/SessionDetailPage'
 import { ProgressPage } from './presentation/pages/ProgressPage'
 import { WorkoutSessionPage } from './presentation/pages/WorkoutSessionPage'
 import { ExercisePickerPage } from './presentation/pages/ExercisePickerPage'
+import { LoginPage } from './presentation/pages/LoginPage'
+import { RequireAuth } from './presentation/components/RequireAuth'
 
 export function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Navigate to="/routines" replace />} />
-          <Route path="/routines" element={<RoutineLibraryPage />} />
-          <Route path="/routines/new" element={<CreateRoutinePage />} />
-          <Route path="/routines/:id/edit" element={<EditRoutinePage />} />
-          <Route path="/history" element={<WorkoutHistoryPage />} />
-          <Route path="/history/:id" element={<SessionDetailPage />} />
-          <Route path="/progress" element={<ProgressPage />} />
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        {/* Protected routes */}
+        <Route element={<RequireAuth />}>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Navigate to="/routines" replace />} />
+            <Route path="/routines" element={<RoutineLibraryPage />} />
+            <Route path="/routines/new" element={<CreateRoutinePage />} />
+            <Route path="/routines/:id/edit" element={<EditRoutinePage />} />
+            <Route path="/history" element={<WorkoutHistoryPage />} />
+            <Route path="/history/:id" element={<SessionDetailPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
+          </Route>
         </Route>
-        <Route path="/exercises/pick" element={<ExercisePickerPage />} />
-        <Route path="/session" element={<WorkoutSessionPage />} />
+        {/* Routes that don't need the layout but still require auth */}
+        <Route element={<RequireAuth />}>
+          <Route path="/exercises/pick" element={<ExercisePickerPage />} />
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
