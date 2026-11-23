@@ -37,7 +37,11 @@ export const LoginPage = () => {
       >
         {loading ? 'Signing in…' : 'Sign in with Google'}
       </button>
-      {error && <p className="mt-2 text-red-500">{error}</p>}
+      {error && (
+        <pre className="mt-2 text-red-500 whitespace-pre-wrap break-all">
+          {JSON.stringify(error, null, 2)}
+        </pre>
+      )}
     </div>
   )
 }
