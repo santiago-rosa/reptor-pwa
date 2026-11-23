@@ -15,7 +15,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
   signInWithGoogle: async () => {
     set({ loading: true, error: null })
-    const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'google' })
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' })
     if (error) {
       set({ error: error.message, loading: false })
     } else {

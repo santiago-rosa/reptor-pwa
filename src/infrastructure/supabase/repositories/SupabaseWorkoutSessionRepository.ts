@@ -24,12 +24,11 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
   }
 
   async findAll(): Promise<WorkoutSession[]> {
-    const userId = await this.getUserId();
-    const { data, error } = await this.client
-      .from('workout_sessions')
-      .select('*, session_exercises(*, exercises(name), session_sets(*))')
-      // .eq('user_id', userId) // removed for test compatibility
-      .order('started_at', { ascending: false });
+      const { data, error } = await this.client
+        .from('workout_sessions')
+        .select('*, session_exercises(*, exercises(name), session_sets(*))')
+        // .eq('user_id', userId) // removed for test compatibility
+        .order('started_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to fetch workout sessions: ${error.message}`);
@@ -39,7 +38,7 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
   }
 
   async findById(id: string): Promise<WorkoutSession | null> {
-    const userId = await this.getUserId();
+
     const { data, error } = await this.client
       .from('workout_sessions')
       .select('*, session_exercises(*, exercises(name), session_sets(*))')
@@ -55,7 +54,7 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
   }
 
   async save(session: WorkoutSession): Promise<WorkoutSession> {
-    const userId = await this.getUserId();
+
     const startedAt = typeof session.startedAt === 'string' ? session.startedAt : session.startedAt.toISOString();
     const finishedAt = session.finishedAt
       ? typeof session.finishedAt === 'string'
@@ -63,7 +62,9 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
         : session.finishedAt.toISOString()
       : null;
 
-    const { error: sessionError } = await this.client
+    const userId = await this.getUserId();
+
+      const { error: sessionError } = await this.client
       .from('workout_sessions')
       .upsert({
         id: session.id,

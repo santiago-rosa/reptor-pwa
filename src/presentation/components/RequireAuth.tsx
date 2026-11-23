@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { supabase } from '../../infrastructure/supabase/client'
 
 export const RequireAuth = () => {
-  const { user, loading, error, signInWithGoogle } = useAuthStore()
+  const { user, loading } = useAuthStore()
 
   // On mount, attempt to restore session if not already in store
   useEffect(() => {

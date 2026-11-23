@@ -21,7 +21,6 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   async findAll(): Promise<Routine[]> {
-    const userId = await this.getUserId()
     const { data, error } = await this.client
       .from('routines')
       .select('*, routine_exercises(*, exercises(name))')
@@ -35,7 +34,6 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   async findById(id: string): Promise<Routine | null> {
-    const userId = await this.getUserId()
     const { data, error } = await this.client
       .from('routines')
       .select('*, routine_exercises(*, exercises(name))')
@@ -50,13 +48,11 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   async save(input: CreateRoutineInput): Promise<Routine> {
-    const userId = await this.getUserId()
     const { data: routineData, error: routineError } = await this.client
       .from('routines')
       .insert({
         name: input.name,
-        plan_id: input.planId ?? null,
-        user_id: userId,
+        plan_id: input.planId ?? null,        user_id: await this.getUserId(),
       })
       .select('*')
       .single()
