@@ -15,17 +15,14 @@ export const LoginPage = () => {
     if (user) navigate('/')
   }, [user, navigate])
 
-  // After OAuth redirect, Supabase session will be restored automatically
+      // After OAuth redirect, sync Supabase session into our auth store
   useEffect(() => {
-    const fetchSession = async () => {
-      const { data } = await supabase.auth.getSession()
-      if (data.session?.user) {
-        // store user in our auth store
-        // the store already updates on signInWithGoogle, but for direct reload we sync here
-        // (optional) could expose a method to set user directly; for simplicity we rely on signInWithGoogle flow
-      }
+    const sync = async () => {
+      await useAuthStore.getState().refreshSession()
+      const { user } = useAuthStore.getState()
+      if (user) navigate('/')
     }
-    fetchSession()
+    sync()
   }, [])
 
   return (
