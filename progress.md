@@ -107,7 +107,7 @@ Overall Progress: **29 / 37 stories completed** (78.4%)
 ---
 
 ## Epic 10 — Authentication
-- [ ] **Story P10.1 — Auth Store & Login/Register Pages**
+- [x] **Story P10.1 — Auth Store & Login/Register Pages** – *Completed*: Implemented a Zustand auth store with Google OAuth, email/password sign‑in/up, sign‑out, session loading and refresh. Added `LoginPage` (Google + email form) and `RegisterPage` components, integrated `RequireAuth` guard, and verified all related tests pass.
 - [ ] **Story P10.2 — Auth Guard & Navigation Profile**
 - [ ] **Story P10.3 — Link Records with `user_id`**
 
