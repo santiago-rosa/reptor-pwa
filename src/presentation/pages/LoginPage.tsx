@@ -36,8 +36,8 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-sm flex flex-col items-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-900 p-4 text-white">
+      <div className="bg-gray-800 p-8 rounded shadow-md w-full max-w-sm flex flex-col items-center text-white">
         {/* App logo */}
         <img src={logo} alt="Reptor" className="w-24 h-24 mb-6" />
 
@@ -49,7 +49,7 @@ export const LoginPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="border p-2 rounded w-full"
+            className="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400"
           />
           <input
             type="password"
@@ -57,7 +57,7 @@ export const LoginPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="border p-2 rounded w-full"
+            className="border border-gray-600 p-2 rounded w-full bg-gray-700 text-white placeholder-gray-400"
           />
           <button
             type="submit"
@@ -82,7 +82,7 @@ export const LoginPage = () => {
 
         {/* Link to register */}
         <div className="mt-2 w-full text-center">
-          <a href="/register" className="text-blue-500 underline">
+          <a href="/register" className="text-blue-400 underline">
             Create an account
           </a>
         </div>
