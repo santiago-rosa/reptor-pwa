@@ -1,6 +1,6 @@
 
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../../infrastructure/supabase/client'
+
 import { useEffect } from 'react'
 import { useAuthStore } from '../stores/authStore'
 
