@@ -1,5 +1,5 @@
-import { NavLink } from 'react-router-dom'
-import { useAuthStore } from '../stores/authStore'
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
 
 export function BottomNav() {
   const navItems = [
@@ -30,9 +30,16 @@ export function BottomNav() {
         </svg>
       ),
     },
-  ]
+  ];
 
-  const { user, signOut, loading } = useAuthStore()
+  const { user, signOut, loading } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    // After signing out, navigate to the login page
+    navigate('/login', { replace: true });
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-gray-900 border-t border-gray-800 flex justify-around items-center z-50">
@@ -55,7 +62,7 @@ export function BottomNav() {
         <div className="flex flex-col items-center justify-center px-2 text-xs text-gray-400">
           <span className="mb-1">{user.email}</span>
           <button
-            onClick={signOut}
+            onClick={handleSignOut}
             disabled={loading}
             className="bg-red-600 hover:bg-red-700 text-white py-0.5 px-2 rounded"
           >
@@ -64,8 +71,5 @@ export function BottomNav() {
         </div>
       )}
     </nav>
-  )
+  );
 }
-
-
-
