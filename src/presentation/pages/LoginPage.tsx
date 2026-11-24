@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
+import logo from '../../assets/logo.svg';
 
 export const LoginPage = () => {
   const { signInWithGoogle, signIn, loading, error, user } = useAuthStore();
@@ -29,65 +30,69 @@ export const LoginPage = () => {
     sync();
   }, [navigate]);
 
-
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     await signIn(email, password);
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6">
-      {/* Google sign‑in button */}
-      <button
-        onClick={signInWithGoogle}
-        disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        {loading ? 'Signing in…' : 'Sign in with Google'}
-      </button>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-sm flex flex-col items-center">
+        {/* App logo */}
+        <img src={logo} alt="Reptor" className="w-24 h-24 mb-6" />
 
-      {/* Divider */}
-      <div className="text-gray-400">or</div>
+        {/* Email / password form */}
+        <form onSubmit={handleEmailLogin} className="flex flex-col gap-2 w-full mb-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="border p-2 rounded w-full"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded"
+          >
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
 
-      {/* Email / password form */}
-      <form onSubmit={handleEmailLogin} className="flex flex-col gap-2 w-80">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="border p-2 rounded"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="border p-2 rounded"
-        />
+        {/* Divider */}
+        <div className="text-gray-400 mb-4">or</div>
+
+        {/* Google sign‑in button */}
         <button
-          type="submit"
+          onClick={signInWithGoogle}
           disabled={loading}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         >
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? 'Signing in…' : 'Sign in with Google'}
         </button>
-      </form>
 
-      {/* Link to register */}
-      <div className="mt-2">
-        <a href="/register" className="text-blue-500 underline">
-          Create an account
-        </a>
+        {/* Link to register */}
+        <div className="mt-2 w-full text-center">
+          <a href="/register" className="text-blue-500 underline">
+            Create an account
+          </a>
+        </div>
+
+        {error && (
+          <pre className="mt-2 text-red-500 whitespace-pre-wrap break-all w-full">
+            {JSON.stringify(error, null, 2)}
+          </pre>
+        )}
       </div>
-
-      {error && (
-        <pre className="mt-2 text-red-500 whitespace-pre-wrap break-all">
-          {JSON.stringify(error, null, 2)}
-        </pre>
-      )}
     </div>
   );
 };
