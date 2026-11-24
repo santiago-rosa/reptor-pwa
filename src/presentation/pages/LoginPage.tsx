@@ -20,10 +20,15 @@ export const LoginPage = () => {
     const sync = async () => {
       await useAuthStore.getState().refreshSession();
       const { user } = useAuthStore.getState();
-      if (user) navigate('/');
+      if (user) {
+        navigate('/');
+        // Clear any leftover hash fragment from the OAuth callback
+        window.location.hash = '';
+      }
     };
     sync();
   }, [navigate]);
+
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -38,7 +38,7 @@ export function BottomNav() {
   const handleSignOut = async () => {
     await signOut();
     // After signing out, navigate to the login page
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   };
 
   return (
