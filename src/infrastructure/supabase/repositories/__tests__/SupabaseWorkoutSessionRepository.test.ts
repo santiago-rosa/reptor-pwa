@@ -54,7 +54,7 @@ describe('SupabaseWorkoutSessionRepository', () => {
     expect(result[0]!.exercises[0]!.sets[0]!.isCompleted).toBe(true)
   })
 
-  it('saves session, exercises, and sets via upsert', async () => {
+  it('saves session, exercises, and sets via upsert with correct column names', async () => {
     const sessionToSave: WorkoutSession = {
       id: 'session-2',
       title: 'Arms',
@@ -136,8 +136,72 @@ describe('SupabaseWorkoutSessionRepository', () => {
     expect(mockFrom).toHaveBeenCalledWith('workout_sessions')
     expect(mockFrom).toHaveBeenCalledWith('session_exercises')
     expect(mockFrom).toHaveBeenCalledWith('session_sets')
+
+    // Verify session_exercises upsert payload uses session_id (not workout_session_id)
+    expect(mockUpsert).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: 'se-2',
+        session_id: 'session-2',
+        exercise_id: 'ex-curl',
+        order_index: 0,
+      }),
+    ])
+
+    // Verify session_sets upsert payload uses set_number (not order_index)
+    expect(mockUpsert).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: 'set-2',
+        session_exercise_id: 'se-2',
+        set_number: 1,
+        weight_kg: 15,
+        reps: 12,
+        is_completed: true,
+      }),
+    ])
+
     expect(mockChain.eq).toHaveBeenCalledWith('id', 'session-2')
     expect(mockChain.eq).toHaveBeenCalledWith('user_id', 'test-user')
     expect(result.id).toBe('session-2')
+  })
+
+  it('rolls back session header if saving session_exercises fails', async () => {
+    const sessionToSave: WorkoutSession = {
+      id: 'session-fail',
+      title: 'Rollback Test',
+      startedAt: '2026-01-01T12:00:00Z',
+      exercises: [
+        {
+          id: 'se-fail',
+          sessionId: 'session-fail',
+          exerciseId: 'ex-1',
+          orderIndex: 0,
+          sets: [],
+        },
+      ],
+    }
+
+    const mockDeleteChain: any = {}
+    mockDeleteChain.eq = vi.fn().mockResolvedValue({ error: null })
+    const mockFrom = vi.fn((table: string) => {
+      if (table === 'workout_sessions') {
+        return {
+          upsert: vi.fn().mockResolvedValue({ error: null }),
+          delete: vi.fn().mockReturnValue(mockDeleteChain),
+        }
+      }
+      if (table === 'session_exercises') {
+        return {
+          upsert: vi.fn().mockResolvedValue({ error: { message: 'Column not found' } }),
+        }
+      }
+      return {}
+    })
+
+    const mockClient = { from: mockFrom } as unknown as SupabaseClient
+    const repo = new SupabaseWorkoutSessionRepository(mockClient)
+
+    await expect(repo.save(sessionToSave)).rejects.toThrow('Failed to save session exercises: Column not found')
+    expect(mockFrom).toHaveBeenCalledWith('workout_sessions')
+    expect(mockDeleteChain.eq).toHaveBeenCalledWith('id', 'session-fail')
   })
 })

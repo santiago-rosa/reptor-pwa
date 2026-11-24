@@ -9,7 +9,7 @@ export function WorkoutHistoryPage() {
   const { sessions, loading, error, fetchSessions } = useWorkoutHistoryStore()
 
   useEffect(() => {
-    fetchSessions()
+    fetchSessions(true)
   }, [fetchSessions])
 
   return (
@@ -49,15 +49,14 @@ export function WorkoutHistoryPage() {
               key={n}
               className="animate-pulse rounded-2xl border border-gray-800 bg-gray-900/40 p-5 space-y-3"
             >
-              <div className="flex justify-between items-center">
-                <div className="h-4 w-28 bg-gray-800 rounded" />
-                <div className="h-4 w-12 bg-gray-800 rounded" />
+              <div className="flex items-center justify-between">
+                <div className="h-4 w-32 rounded bg-gray-800" />
+                <div className="h-4 w-16 rounded bg-gray-800" />
               </div>
-              <div className="h-5 w-48 bg-gray-800 rounded" />
-              <div className="flex gap-4 pt-1">
-                <div className="h-3 w-16 bg-gray-800 rounded" />
-                <div className="h-3 w-16 bg-gray-800 rounded" />
-                <div className="h-3 w-20 bg-gray-800 rounded" />
+              <div className="h-6 w-48 rounded bg-gray-800" />
+              <div className="flex gap-4">
+                <div className="h-4 w-20 rounded bg-gray-800" />
+                <div className="h-4 w-20 rounded bg-gray-800" />
               </div>
             </div>
           ))}
@@ -76,8 +75,8 @@ export function WorkoutHistoryPage() {
         />
       )}
 
-      {/* Session Cards List */}
-      {sessions.length > 0 && (
+      {/* Sessions List */}
+      {!loading && sessions.length > 0 && (
         <div className="space-y-3">
           {sessions.map((session) => (
             <SessionSummaryCard

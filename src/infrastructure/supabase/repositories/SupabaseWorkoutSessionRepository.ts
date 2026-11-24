@@ -94,12 +94,16 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
     if (session.exercises.length > 0) {
       const exerciseRows = session.exercises.map((ex, idx) => ({
         id: ex.id ?? crypto.randomUUID(),
-        workout_session_id: session.id,
+        session_id: session.id,
         exercise_id: ex.exerciseId,
+        order: ex.orderIndex ?? idx,
         order_index: ex.orderIndex ?? idx,
       }));
       const { error: exError } = await this.client.from('session_exercises').upsert(exerciseRows);
-      if (exError) throw new Error(`Failed to save session exercises: ${exError.message}`);
+      if (exError) {
+        await this.client.from('workout_sessions').delete().eq('id', session.id);
+        throw new Error(`Failed to save session exercises: ${exError.message}`);
+      }
 
       const setRows = session.exercises.flatMap((ex, exIdx) => {
         const exerciseId = exerciseRows[exIdx]!.id;
@@ -109,12 +113,16 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
           weight_kg: set.weightKg,
           reps: set.reps,
           is_completed: set.isCompleted,
-          order_index: set.setNumber,
+          set_number: set.setNumber,
         }));
       });
       if (setRows.length > 0) {
         const { error: setError } = await this.client.from('session_sets').upsert(setRows);
-        if (setError) throw new Error(`Failed to save session sets: ${setError.message}`);
+        if (setError) {
+          await this.client.from('session_exercises').delete().eq('session_id', session.id);
+          await this.client.from('workout_sessions').delete().eq('id', session.id);
+          throw new Error(`Failed to save session sets: ${setError.message}`);
+        }
       }
     }
 
