@@ -11,20 +11,34 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   private async getUserId(): Promise<string> {
-    if (this.client && (this.client as any).auth && typeof (this.client as any).auth.getUser === 'function') {
-      const { data } = await (this.client as any).auth.getUser()
-      const userId = data?.user?.id
-      if (!userId) throw new Error('User not authenticated')
-      return userId
+    if (this.client && (this.client as any).auth) {
+      if (typeof (this.client as any).auth.getUser === 'function') {
+        try {
+          const { data } = await (this.client as any).auth.getUser()
+          if (data?.user?.id) return data.user.id
+        } catch {
+          // fallback to getSession
+        }
+      }
+      if (typeof (this.client as any).auth.getSession === 'function') {
+        try {
+          const { data } = await (this.client as any).auth.getSession()
+          if (data?.session?.user?.id) return data.session.user.id
+        } catch {
+          // ignore
+        }
+      }
+      throw new Error('User not authenticated')
     }
     return 'test-user'
   }
 
   async findAll(): Promise<Routine[]> {
+    const userId = await this.getUserId()
     const { data, error } = await this.client
       .from('routines')
       .select('*, routine_exercises(*, exercises(name))')
-      // .eq('user_id', userId) // removed for test compatibility
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -34,11 +48,12 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   async findById(id: string): Promise<Routine | null> {
+    const userId = await this.getUserId()
     const { data, error } = await this.client
       .from('routines')
       .select('*, routine_exercises(*, exercises(name))')
       .eq('id', id)
-      // .eq('user_id', userId) // removed for test compatibility
+      .eq('user_id', userId)
       .maybeSingle()
     if (error) {
       throw new Error(`Failed to fetch routine: ${error.message}`)
@@ -48,11 +63,13 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   async save(input: CreateRoutineInput): Promise<Routine> {
+    const userId = input.userId || (await this.getUserId())
     const { data: routineData, error: routineError } = await this.client
       .from('routines')
       .insert({
         name: input.name,
-        plan_id: input.planId ?? null,        user_id: await this.getUserId(),
+        plan_id: input.planId ?? null,
+        user_id: userId,
       })
       .select('*')
       .single()
@@ -85,13 +102,18 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   async update(input: UpdateRoutineInput): Promise<Routine> {
+    const userId = await this.getUserId()
     const updatePayload: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     }
     if (input.name !== undefined) updatePayload.name = input.name
     if (input.planId !== undefined) updatePayload.plan_id = input.planId
 
-    const { error: routineError } = await this.client.from('routines').update(updatePayload).eq('id', input.id)
+    const { error: routineError } = await this.client
+      .from('routines')
+      .update(updatePayload)
+      .eq('id', input.id)
+      .eq('user_id', userId)
     if (routineError) {
       throw new Error(`Failed to update routine: ${routineError.message}`)
     }
@@ -126,17 +148,24 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.client.from('routines').delete().eq('id', id)
+    const userId = await this.getUserId()
+    const { error } = await this.client
+      .from('routines')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId)
     if (error) {
       throw new Error(`Failed to delete routine: ${error.message}`)
     }
   }
 
   async assignToPlan(routineId: string, planId: string | null): Promise<void> {
+    const userId = await this.getUserId()
     const { error } = await this.client
       .from('routines')
       .update({ plan_id: planId, updated_at: new Date().toISOString() })
       .eq('id', routineId)
+      .eq('user_id', userId)
     if (error) {
       throw new Error(`Failed to assign routine to plan: ${error.message}`)
     }
@@ -156,6 +185,7 @@ export class SupabaseRoutineRepository implements IRoutineRepository {
         repsMin: re.reps_min,
         repsMax: re.reps_max ?? null,
       }))
+
     return {
       id: row.id,
       name: row.name,

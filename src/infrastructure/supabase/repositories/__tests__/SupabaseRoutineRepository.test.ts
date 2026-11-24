@@ -36,7 +36,8 @@ describe('SupabaseRoutineRepository', () => {
     }
 
     const mockOrder = vi.fn().mockResolvedValue({ data: [mockRow], error: null })
-    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder })
+    const mockEq = vi.fn().mockReturnValue({ order: mockOrder })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
     const mockFrom = vi.fn().mockReturnValue({ select: mockSelect })
 
     const mockClient = { from: mockFrom } as unknown as SupabaseClient
@@ -46,6 +47,7 @@ describe('SupabaseRoutineRepository', () => {
 
     expect(mockFrom).toHaveBeenCalledWith('routines')
     expect(mockSelect).toHaveBeenCalledWith('*, routine_exercises(*, exercises(name))')
+    expect(mockEq).toHaveBeenCalledWith('user_id', 'test-user')
     expect(result).toHaveLength(1)
     expect(result[0]!.exercises[0]!.exerciseName).toBe('Bench Press')
     expect(result[0]!.exercises[1]!.exerciseName).toBe('Tricep Pushdown')
@@ -54,15 +56,15 @@ describe('SupabaseRoutineRepository', () => {
   it('rolls back routine insert if inserting exercises fails', async () => {
     const mockFrom = vi.fn((table: string) => {
       if (table === 'routines') {
+        const mockDeleteChain: any = {}
+        mockDeleteChain.eq = vi.fn().mockResolvedValue({ error: null })
         return {
           insert: vi.fn().mockReturnValue({
             select: vi.fn().mockReturnValue({
               single: vi.fn().mockResolvedValue({ data: { id: 'r-new', name: 'Rollback Test' }, error: null }),
             }),
           }),
-          delete: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ error: null }),
-          }),
+          delete: vi.fn().mockReturnValue(mockDeleteChain),
         }
       }
       if (table === 'routine_exercises') {

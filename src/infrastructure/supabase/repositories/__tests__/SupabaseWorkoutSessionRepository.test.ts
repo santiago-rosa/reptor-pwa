@@ -35,7 +35,8 @@ describe('SupabaseWorkoutSessionRepository', () => {
     }
 
     const mockOrder = vi.fn().mockResolvedValue({ data: [mockRow], error: null })
-    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder })
+    const mockEq = vi.fn().mockReturnValue({ order: mockOrder })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
     const mockFrom = vi.fn().mockReturnValue({ select: mockSelect })
 
     const mockClient = { from: mockFrom } as unknown as SupabaseClient
@@ -44,6 +45,7 @@ describe('SupabaseWorkoutSessionRepository', () => {
     const result = await repo.findAll()
 
     expect(mockFrom).toHaveBeenCalledWith('workout_sessions')
+    expect(mockEq).toHaveBeenCalledWith('user_id', 'test-user')
     expect(mockOrder).toHaveBeenCalledWith('started_at', { ascending: false })
     expect(result).toHaveLength(1)
     expect(result[0]!.title).toBe('Full Body')
@@ -110,8 +112,9 @@ describe('SupabaseWorkoutSessionRepository', () => {
       error: null,
     })
 
-    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
-    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
+    const mockChain: any = { maybeSingle: mockMaybeSingle }
+    mockChain.eq = vi.fn().mockReturnValue(mockChain)
+    const mockSelect = vi.fn().mockReturnValue(mockChain)
 
     const mockFrom = vi.fn((table: string) => {
       if (table === 'workout_sessions') {
@@ -133,6 +136,8 @@ describe('SupabaseWorkoutSessionRepository', () => {
     expect(mockFrom).toHaveBeenCalledWith('workout_sessions')
     expect(mockFrom).toHaveBeenCalledWith('session_exercises')
     expect(mockFrom).toHaveBeenCalledWith('session_sets')
+    expect(mockChain.eq).toHaveBeenCalledWith('id', 'session-2')
+    expect(mockChain.eq).toHaveBeenCalledWith('user_id', 'test-user')
     expect(result.id).toBe('session-2')
   })
 })

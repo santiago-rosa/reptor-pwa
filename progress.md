@@ -109,7 +109,7 @@ Overall Progress: **29 / 37 stories completed** (78.4%)
 ## Epic 10 — Authentication
 - [x] **Story P10.1 — Auth Store & Login/Register Pages** – *Completed*: Implemented a Zustand auth store with Google OAuth, email/password sign‑in/up, sign‑out, session loading and refresh. Added `LoginPage` (Google + email form) and `RegisterPage` components, integrated `RequireAuth` guard, and verified all related tests pass.
 - [x] **Story P10.2 — Auth Guard & Navigation Profile** – *Completed*: Added `RequireAuth` guard that restores persisted Supabase sessions on mount, integrated user profile display (email) and sign‑out button into `BottomNav`. All protected routes now redirect to `/login` when unauthenticated.
-- [x] **Story P10.3 — Link Records with `user_id`** – *Completed*: Updated repositories to store `user_id` from Supabase session.
+- [x] **Story P10.3 — Link Records with `user_id`** – *Completed*: Updated Supabase repositories (`SupabaseWorkoutSessionRepository`, `SupabaseRoutineRepository`, `SupabasePlanRepository`) to strictly scope queries (`findAll`, `findById`, updates, deletes) by `user_id`, ensure `user_id` is set from the authenticated session, and clear cached client stores (active session, history, routines, plans) on sign out and user switch.
 
 ---
 

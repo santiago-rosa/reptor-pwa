@@ -10,7 +10,8 @@ describe('SupabasePlanRepository', () => {
     ]
 
     const mockOrder = vi.fn().mockResolvedValue({ data: mockPlans, error: null })
-    const mockSelect = vi.fn().mockReturnValue({ order: mockOrder })
+    const mockEq = vi.fn().mockReturnValue({ order: mockOrder })
+    const mockSelect = vi.fn().mockReturnValue({ eq: mockEq })
     const mockFrom = vi.fn().mockReturnValue({ select: mockSelect })
 
     const mockClient = { from: mockFrom } as unknown as SupabaseClient
@@ -19,6 +20,7 @@ describe('SupabasePlanRepository', () => {
     const result = await repo.findAll()
 
     expect(mockFrom).toHaveBeenCalledWith('plans')
+    expect(mockEq).toHaveBeenCalledWith('user_id', 'test-user')
     expect(mockOrder).toHaveBeenCalledWith('name', { ascending: true })
     expect(result).toEqual([
       { id: 'p-1', name: 'Upper Lower', userId: 'u-1', createdAt: '2026-01-01', updatedAt: undefined },

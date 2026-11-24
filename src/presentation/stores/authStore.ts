@@ -1,5 +1,18 @@
 import { create } from 'zustand';
 import { supabase } from '../../infrastructure/supabase/client';
+import { useWorkoutSessionStore } from './workoutSessionStore';
+import { useWorkoutHistoryStore } from './workoutHistoryStore';
+import { useRoutineStore } from './routineStore';
+import { usePlanStore } from './planStore';
+import { useRoutineDraftStore } from './routineDraftStore';
+
+export const resetUserStores = () => {
+  useWorkoutSessionStore.getState().discard();
+  useWorkoutHistoryStore.setState({ sessions: [], selectedSession: null, error: null });
+  useRoutineStore.setState({ routines: [], error: null });
+  usePlanStore.setState({ plans: [], error: null });
+  useRoutineDraftStore.getState().reset();
+};
 
 export interface AuthState {
   user: any | null;
@@ -13,7 +26,7 @@ export interface AuthState {
   refreshSession: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: false,
   error: null,
@@ -38,7 +51,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) {
       set({ error: error.message, loading: false });
     } else {
-      set({ user: data.user ?? null, loading: false });
+      const newUser = data.user ?? null;
+      if (get().user && newUser?.id !== get().user?.id) {
+        resetUserStores();
+      }
+      set({ user: newUser, loading: false });
     }
   },
 
@@ -48,14 +65,18 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) {
       set({ error: error.message, loading: false });
     } else {
-      // After sign‑up Supabase may send a confirmation email; treat as signed‑in.
-      set({ user: data.user ?? null, loading: false });
+      const newUser = data.user ?? null;
+      if (get().user && newUser?.id !== get().user?.id) {
+        resetUserStores();
+      }
+      set({ user: newUser, loading: false });
     }
   },
 
   signOut: async () => {
     set({ loading: true });
     const { error } = await supabase.auth.signOut();
+    resetUserStores();
     if (error) {
       set({ error: error.message, loading: false });
     } else {
@@ -69,12 +90,36 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (error) {
       set({ error: error.message, loading: false });
     } else {
-      set({ user: data.session?.user ?? null, loading: false });
+      const newUser = data.session?.user ?? null;
+      if (get().user && newUser?.id !== get().user?.id) {
+        resetUserStores();
+      }
+      set({ user: newUser, loading: false });
     }
   },
 
   refreshSession: async () => {
     const { data } = await supabase.auth.getSession();
-    set({ user: data.session?.user ?? null, loading: false });
+    const newUser = data.session?.user ?? null;
+    if (get().user && newUser?.id !== get().user?.id) {
+      resetUserStores();
+    }
+    set({ user: newUser, loading: false });
   },
 }));
+
+// Listen to Supabase auth events to keep stores clean across auth state changes
+if (supabase?.auth?.onAuthStateChange) {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      resetUserStores();
+      useAuthStore.setState({ user: null, loading: false });
+    } else if (session?.user) {
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser && currentUser.id !== session.user.id) {
+        resetUserStores();
+      }
+      useAuthStore.setState({ user: session.user, loading: false });
+    }
+  });
+}

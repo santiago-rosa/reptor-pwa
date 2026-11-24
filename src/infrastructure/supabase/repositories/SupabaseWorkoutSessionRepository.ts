@@ -12,23 +12,36 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
 
   // Helper to get current user id, throws if not authenticated
   private async getUserId(): Promise<string> {
-    // In production we use Supabase auth; in tests the client mock may not implement auth.
-    if (this.client && (this.client as any).auth && typeof (this.client as any).auth.getUser === 'function') {
-      const { data } = await (this.client as any).auth.getUser();
-      const userId = data?.user?.id;
-      if (!userId) throw new Error('User not authenticated');
-      return userId;
+    if (this.client && (this.client as any).auth) {
+      if (typeof (this.client as any).auth.getUser === 'function') {
+        try {
+          const { data } = await (this.client as any).auth.getUser();
+          if (data?.user?.id) return data.user.id;
+        } catch {
+          // Fallback to getSession
+        }
+      }
+      if (typeof (this.client as any).auth.getSession === 'function') {
+        try {
+          const { data } = await (this.client as any).auth.getSession();
+          if (data?.session?.user?.id) return data.session.user.id;
+        } catch {
+          // ignore
+        }
+      }
+      throw new Error('User not authenticated');
     }
     // Fallback for unit tests or environments without auth.
     return 'test-user';
   }
 
   async findAll(): Promise<WorkoutSession[]> {
-      const { data, error } = await this.client
-        .from('workout_sessions')
-        .select('*, session_exercises(*, exercises(name), session_sets(*))')
-        // .eq('user_id', userId) // removed for test compatibility
-        .order('started_at', { ascending: false });
+    const userId = await this.getUserId();
+    const { data, error } = await this.client
+      .from('workout_sessions')
+      .select('*, session_exercises(*, exercises(name), session_sets(*))')
+      .eq('user_id', userId)
+      .order('started_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to fetch workout sessions: ${error.message}`);
@@ -38,12 +51,12 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
   }
 
   async findById(id: string): Promise<WorkoutSession | null> {
-
+    const userId = await this.getUserId();
     const { data, error } = await this.client
       .from('workout_sessions')
       .select('*, session_exercises(*, exercises(name), session_sets(*))')
       .eq('id', id)
-      // .eq('user_id', userId) // removed for test compatibility
+      .eq('user_id', userId)
       .maybeSingle();
 
     if (error) {
@@ -54,7 +67,6 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
   }
 
   async save(session: WorkoutSession): Promise<WorkoutSession> {
-
     const startedAt = typeof session.startedAt === 'string' ? session.startedAt : session.startedAt.toISOString();
     const finishedAt = session.finishedAt
       ? typeof session.finishedAt === 'string'
@@ -64,7 +76,7 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
 
     const userId = await this.getUserId();
 
-      const { error: sessionError } = await this.client
+    const { error: sessionError } = await this.client
       .from('workout_sessions')
       .upsert({
         id: session.id,
