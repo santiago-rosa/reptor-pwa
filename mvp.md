@@ -1,6 +1,8 @@
-# Reptor PWA — Implementation Progress
+# Reptor PWA — MVP Progress
 
-Overall Progress: **29 / 37 stories completed** (78.4%)
+MVP Status: **35 / 35 stories completed** (100%)
+
+> Remaining post-MVP / next-phase stories (Epics 9, 11, and 12) were moved to `mvp1.md`.
 
 ---
 
@@ -100,25 +102,7 @@ Overall Progress: **29 / 37 stories completed** (78.4%)
 
 ---
 
-## Epic 9 — Progress Tracking UI
-- [ ] **Story P9.1 — Progress Page & Exercise Filter**
-- [ ] **Story P9.2 — Recharts Line Visualization**
-
----
-
 ## Epic 10 — Authentication
 - [x] **Story P10.1 — Auth Store & Login/Register Pages** – *Completed*: Implemented a Zustand auth store with Google OAuth, email/password sign‑in/up, sign‑out, session loading and refresh. Added `LoginPage` (Google + email form) and `RegisterPage` components, integrated `RequireAuth` guard, and verified all related tests pass.
 - [x] **Story P10.2 — Auth Guard & Navigation Profile** – *Completed*: Added `RequireAuth` guard that restores persisted Supabase sessions on mount, integrated user profile display (email) and sign‑out button into `BottomNav`. All protected routes now redirect to `/login` when unauthenticated.
 - [x] **Story P10.3 — Link Records with `user_id`** – *Completed*: Updated Supabase repositories (`SupabaseWorkoutSessionRepository`, `SupabaseRoutineRepository`, `SupabasePlanRepository`) to strictly scope queries (`findAll`, `findById`, updates, deletes) by `user_id`, ensure `user_id` is set from the authenticated session, and clear cached client stores (active session, history, routines, plans) on sign out and user switch.
-
----
-
-## Epic 11 — Custom Exercises (Post-MVP)
-- [ ] **Story P11.1 — Custom Exercise Domain & Schema Migration**
-- [ ] **Story P11.2 — Custom Exercise Form & Management UI**
-
----
-
-## Epic 12 — AI Progress Analysis (Gemini)
-- [ ] **Story P12.1 — Supabase Edge Function for Gemini API**
-- [ ] **Story P12.2 — AI Analysis UI on Progress Page**
