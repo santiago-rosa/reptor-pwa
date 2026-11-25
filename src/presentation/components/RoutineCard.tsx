@@ -1,4 +1,5 @@
 import type { Routine } from '@/domain/entities/Routine'
+import { formatReps } from '@/presentation/utils/formatReps'
 
 interface RoutineCardProps {
   routine: Routine
@@ -9,6 +10,13 @@ interface RoutineCardProps {
 export function RoutineCard({ routine, onStart, onMenuClick }: RoutineCardProps) {
   const exercisesCount = routine.exercises.length
   const totalSets = routine.exercises.reduce((sum, ex) => sum + (ex.sets || 0), 0)
+
+  // Rep range summary: show range if any exercise has a range, else first exercise's reps
+  const repsSummary = (() => {
+    if (routine.exercises.length === 0) return null
+    const first = routine.exercises[0]
+    return formatReps(first.repsMin, first.repsMax)
+  })()
 
   // Preview names of first 3 exercises
   const previewNames = routine.exercises
@@ -22,7 +30,7 @@ export function RoutineCard({ routine, onStart, onMenuClick }: RoutineCardProps)
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-base font-semibold text-white">{routine.name}</h3>
           <p className="mt-0.5 text-xs text-gray-400">
-            {exercisesCount} {exercisesCount === 1 ? 'exercise' : 'exercises'} · {totalSets} {totalSets === 1 ? 'set' : 'sets'}
+            {exercisesCount} {exercisesCount === 1 ? 'exercise' : 'exercises'} · {totalSets} {totalSets === 1 ? 'set' : 'sets'}{repsSummary ? ` · ${repsSummary}` : ''}
           </p>
           {previewNames && (
             <p className="mt-2 truncate text-xs text-gray-500">{previewNames}{routine.exercises.length > 3 ? '...' : ''}</p>

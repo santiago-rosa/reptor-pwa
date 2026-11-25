@@ -31,6 +31,8 @@ export class StartSession {
         exerciseName: re.exerciseName,
         orderIndex: exIndex,
         sets,
+        repTargetMin: re.repsMin,
+        repTargetMax: re.repsMax ?? null,
       }
     })
 

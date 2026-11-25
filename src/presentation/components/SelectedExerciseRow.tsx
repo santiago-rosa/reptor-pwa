@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { DraftExercise } from '../stores/routineDraftStore'
 
 interface SelectedExerciseRowProps {
@@ -13,6 +14,43 @@ export function SelectedExerciseRow({
   onUpdateReps,
   onRemove,
 }: SelectedExerciseRowProps) {
+  // isRange: true when repsMax is set and differs from repsMin
+  const [isRange, setIsRange] = useState<boolean>(
+    exercise.repsMax != null && exercise.repsMax !== exercise.repsMin
+  )
+
+  const handleToggleRange = () => {
+    if (isRange) {
+      // Switch to single: clear repsMax
+      setIsRange(false)
+      onUpdateReps(exercise.repsMin, null)
+    } else {
+      // Switch to range: default max to repsMin + 2
+      setIsRange(true)
+      onUpdateReps(exercise.repsMin, exercise.repsMin + 2)
+    }
+  }
+
+  const handleMinChange = (raw: string) => {
+    const min = Math.max(1, parseInt(raw) || 1)
+    if (isRange) {
+      // Keep max >= min
+      const max = exercise.repsMax != null ? Math.max(exercise.repsMax, min) : min + 2
+      onUpdateReps(min, max)
+    } else {
+      onUpdateReps(min, null)
+    }
+  }
+
+  const handleMaxChange = (raw: string) => {
+    if (!raw) {
+      onUpdateReps(exercise.repsMin, null)
+      return
+    }
+    const max = Math.max(exercise.repsMin, parseInt(raw) || exercise.repsMin)
+    onUpdateReps(exercise.repsMin, max)
+  }
+
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/80 p-4 transition-colors">
       <div className="flex items-center justify-between gap-3">
@@ -56,32 +94,47 @@ export function SelectedExerciseRow({
           </div>
         </div>
 
-        {/* Reps Range */}
-        <div className="flex items-center gap-1.5 text-xs text-gray-300">
-          <span className="text-gray-400">Reps</span>
-          <input
-            type="number"
-            min={1}
-            max={100}
-            aria-label="Minimum reps"
-            value={exercise.repsMin}
-            onChange={(e) => onUpdateReps(Math.max(1, parseInt(e.target.value) || 1), exercise.repsMax)}
-            className="w-12 rounded-lg border border-gray-800 bg-gray-950 px-2 py-1 text-center text-xs text-white focus:border-blue-500 focus:outline-none"
-          />
-          <span className="text-gray-500">-</span>
-          <input
-            type="number"
-            min={1}
-            max={100}
-            aria-label="Maximum reps"
-            value={exercise.repsMax ?? ''}
-            placeholder="—"
-            onChange={(e) => {
-              const val = e.target.value ? Math.max(1, parseInt(e.target.value) || 1) : null
-              onUpdateReps(exercise.repsMin, val)
-            }}
-            className="w-12 rounded-lg border border-gray-800 bg-gray-950 px-2 py-1 text-center text-xs text-white focus:border-blue-500 focus:outline-none"
-          />
+        {/* Reps — single or range */}
+        <div className="flex items-center gap-2">
+          {/* Range toggle pill */}
+          <button
+            type="button"
+            aria-label={isRange ? 'Switch to single rep target' : 'Switch to rep range'}
+            onClick={handleToggleRange}
+            className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-colors border ${
+              isRange
+                ? 'bg-blue-600/20 border-blue-500/50 text-blue-400'
+                : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            {isRange ? 'Range' : 'Single'}
+          </button>
+
+          <div className="flex items-center gap-1 text-xs text-gray-300">
+            <input
+              type="number"
+              min={1}
+              max={100}
+              aria-label={isRange ? 'Minimum reps' : 'Reps'}
+              value={exercise.repsMin}
+              onChange={(e) => handleMinChange(e.target.value)}
+              className="w-12 rounded-lg border border-gray-800 bg-gray-950 px-2 py-1 text-center text-xs text-white focus:border-blue-500 focus:outline-none"
+            />
+            {isRange && (
+              <>
+                <span className="text-gray-500 select-none">–</span>
+                <input
+                  type="number"
+                  min={exercise.repsMin}
+                  max={100}
+                  aria-label="Maximum reps"
+                  value={exercise.repsMax ?? ''}
+                  onChange={(e) => handleMaxChange(e.target.value)}
+                  className="w-12 rounded-lg border border-gray-800 bg-gray-950 px-2 py-1 text-center text-xs text-white focus:border-blue-500 focus:outline-none"
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

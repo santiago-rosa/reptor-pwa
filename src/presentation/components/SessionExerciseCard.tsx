@@ -1,5 +1,6 @@
 import type { SessionExercise } from '@/domain/entities/WorkoutSession'
 import { SessionSetRow } from './SessionSetRow'
+import { formatReps } from '@/presentation/utils/formatReps'
 
 interface SessionExerciseCardProps {
   exercise: SessionExercise
@@ -23,9 +24,16 @@ export function SessionExerciseCard({
     <div className="rounded-2xl border border-gray-800 bg-gray-900/70 p-4 space-y-3">
       {/* Exercise Card Header */}
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-sm text-white truncate pr-2">
-          {exercise.exerciseName || 'Exercise'}
-        </h3>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-bold text-sm text-white truncate pr-2">
+            {exercise.exerciseName || 'Exercise'}
+          </h3>
+          {exercise.repTargetMin != null && (
+            <p className="text-[10px] text-gray-500 mt-0.5">
+              Target: {formatReps(exercise.repTargetMin, exercise.repTargetMax)}
+            </p>
+          )}
+        </div>
         <span className="text-xs font-medium text-gray-400 bg-gray-800 px-2.5 py-1 rounded-full shrink-0">
           {completedCount} / {totalCount} completed
         </span>

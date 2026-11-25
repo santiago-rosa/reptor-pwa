@@ -14,6 +14,9 @@ export interface SessionExercise {
   exerciseName?: string
   orderIndex: number
   sets: SessionSet[]
+  /** Rep target from the routine template, if started from one */
+  repTargetMin?: number | null
+  repTargetMax?: number | null
 }
 
 export interface WorkoutSession {
