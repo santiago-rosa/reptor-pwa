@@ -40,6 +40,8 @@ export type ExerciseCategory =
 export interface Exercise {
   id: string
   name: string
+  nameEn?: string
+  nameEs?: string
   muscleGroups: MuscleGroup[]
   equipment: Equipment
   category?: ExerciseCategory

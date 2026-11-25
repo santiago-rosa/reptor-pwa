@@ -27,6 +27,8 @@ export class SupabaseExerciseRepository implements IExerciseRepository {
     return {
       id: row.id,
       name: row.name,
+      ...(row.name_en ? { nameEn: row.name_en } : {}),
+      ...(row.name_es ? { nameEs: row.name_es } : {}),
       muscleGroups: (row.muscle_groups ?? []) as MuscleGroup[],
       equipment: row.equipment as Equipment,
       category: (row.category ?? undefined) as ExerciseCategory | undefined,

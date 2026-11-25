@@ -37,18 +37,26 @@ export function ExercisePickerPage() {
   const filteredExercises = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     if (!query) return exercises
-    return exercises.filter((ex) => ex.name.toLowerCase().includes(query))
+    return exercises.filter(
+      (ex) =>
+        ex.name.toLowerCase().includes(query) ||
+        (ex.nameEn?.toLowerCase().includes(query) ?? false) ||
+        (ex.nameEs?.toLowerCase().includes(query) ?? false)
+    )
   }, [exercises, searchQuery])
 
   const groupedExercises = useMemo(() => {
     const groups: Record<string, Exercise[]> = {}
     for (const ex of filteredExercises) {
+      const bilingualLabel = ex.muscleGroups?.find((g) => g.includes(' / '))
       const rawGroup =
-        (ex.muscleGroups && ex.muscleGroups.length > 0 && ex.muscleGroups[0])
+        bilingualLabel ??
+        (ex.muscleGroups && ex.muscleGroups.length > 0 && ex.muscleGroups[0]
           ? ex.muscleGroups[0]
-          : 'other'
-      const formattedGroup =
-        rawGroup.charAt(0).toUpperCase() + rawGroup.slice(1).replace(/_/g, ' ')
+          : 'other')
+      const formattedGroup = bilingualLabel
+        ? rawGroup
+        : rawGroup.charAt(0).toUpperCase() + rawGroup.slice(1).replace(/_/g, ' ')
       if (!groups[formattedGroup]) {
         groups[formattedGroup] = []
       }

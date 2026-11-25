@@ -9,6 +9,8 @@ describe('SupabaseExerciseRepository', () => {
       {
         id: '1',
         name: 'Bench Press',
+        name_en: 'Bench Press',
+        name_es: 'Press de banca',
         muscle_groups: ['chest', 'triceps'],
         equipment: 'barbell',
         category: 'strength',
@@ -35,6 +37,8 @@ describe('SupabaseExerciseRepository', () => {
       {
         id: '1',
         name: 'Bench Press',
+        nameEn: 'Bench Press',
+        nameEs: 'Press de banca',
         muscleGroups: ['chest', 'triceps'],
         equipment: 'barbell',
         category: 'strength',

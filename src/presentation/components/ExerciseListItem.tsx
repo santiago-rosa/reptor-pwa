@@ -43,6 +43,11 @@ export function ExerciseListItem({
         <span className="text-sm font-medium text-white truncate">
           {exercise.name}
         </span>
+        {exercise.nameEs && exercise.nameEs !== exercise.name && (
+          <span className="text-xs text-gray-400 truncate mt-0.5">
+            {exercise.nameEs}
+          </span>
+        )}
         <div className="flex items-center gap-1.5 mt-1">
           <span className="inline-block text-[11px] font-medium px-2 py-0.5 rounded bg-gray-800 text-gray-400 capitalize">
             {formattedEquipment}

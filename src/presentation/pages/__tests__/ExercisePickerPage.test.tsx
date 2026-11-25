@@ -183,4 +183,35 @@ describe('ExercisePickerPage', () => {
     expect(sessionExercises?.map((e) => e.exerciseId)).toEqual(['ex-1', 'ex-2'])
     expect(mockNavigate).toHaveBeenCalledWith(-1)
   })
+
+  it('searches by Spanish name and displays bilingual name and muscle group label', () => {
+    useExerciseStore.setState({
+      exercises: [
+        {
+          id: 'ex-bi-1',
+          name: 'Flat Barbell Bench Press',
+          nameEn: 'Flat Barbell Bench Press',
+          nameEs: 'Press de banca plano con barra',
+          muscleGroups: ['chest', 'Pecho / Chest'],
+          equipment: 'barbell',
+        },
+      ],
+    })
+
+    render(
+      <MemoryRouter initialEntries={['/exercises/pick?mode=routine']}>
+        <Routes>
+          <Route path="/exercises/pick" element={<ExercisePickerPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText('Pecho / Chest')).toBeInTheDocument()
+    expect(screen.getByText('Press de banca plano con barra')).toBeInTheDocument()
+
+    const searchInput = screen.getByPlaceholderText('Search exercises by name...')
+    fireEvent.change(searchInput, { target: { value: 'plano con barra' } })
+
+    expect(screen.getByText('Flat Barbell Bench Press')).toBeInTheDocument()
+  })
 })
