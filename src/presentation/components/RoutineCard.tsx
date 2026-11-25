@@ -13,8 +13,8 @@ export function RoutineCard({ routine, onStart, onMenuClick }: RoutineCardProps)
 
   // Rep range summary: show range if any exercise has a range, else first exercise's reps
   const repsSummary = (() => {
-    if (routine.exercises.length === 0) return null
     const first = routine.exercises[0]
+    if (!first) return null
     return formatReps(first.repsMin, first.repsMax)
   })()
 
