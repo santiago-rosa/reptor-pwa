@@ -4,6 +4,7 @@ export interface SessionSetRow {
   set_number: number
   weight_kg: number
   reps: number
+  rpe?: number | null
   is_completed: boolean
   created_at?: string | null
 }

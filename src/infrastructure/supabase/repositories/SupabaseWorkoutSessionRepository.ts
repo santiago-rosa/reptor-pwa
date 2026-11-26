@@ -112,6 +112,7 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
           session_exercise_id: exerciseId,
           weight_kg: set.weightKg,
           reps: set.reps,
+          rpe: set.rpe ?? null,
           is_completed: set.isCompleted,
           set_number: set.setNumber,
         }));
@@ -145,6 +146,7 @@ export class SupabaseWorkoutSessionRepository implements IWorkoutSessionReposito
             setNumber: s.set_number,
             weightKg: s.weight_kg,
             reps: s.reps,
+            rpe: s.rpe ?? null,
             isCompleted: s.is_completed,
           }));
         return {

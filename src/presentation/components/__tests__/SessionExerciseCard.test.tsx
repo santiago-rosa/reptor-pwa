@@ -46,6 +46,7 @@ describe('SessionExerciseCard', () => {
     expect(screen.getByText('Set')).toBeInTheDocument()
     expect(screen.getByText('Kg')).toBeInTheDocument()
     expect(screen.getByText('Reps')).toBeInTheDocument()
+    expect(screen.getByText('RPE')).toBeInTheDocument()
     expect(screen.getByTestId('set-row-1')).toBeInTheDocument()
     expect(screen.getByTestId('set-row-2')).toBeInTheDocument()
   })

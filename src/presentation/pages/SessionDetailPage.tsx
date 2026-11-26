@@ -160,9 +160,10 @@ export function SessionDetailPage() {
                 <div className="p-3">
                   <div className="grid grid-cols-12 gap-2 pb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wider px-2">
                     <div className="col-span-2">Set</div>
-                    <div className="col-span-4 text-center">Weight</div>
+                    <div className="col-span-3 text-center">Weight</div>
                     <div className="col-span-3 text-center">Reps</div>
-                    <div className="col-span-3 text-right">Status</div>
+                    <div className="col-span-2 text-center">RPE</div>
+                    <div className="col-span-2 text-right">Status</div>
                   </div>
 
                   <div className="space-y-1.5">
@@ -176,13 +177,22 @@ export function SessionDetailPage() {
                         <div className="col-span-2 font-bold text-gray-400">
                           #{set.setNumber}
                         </div>
-                        <div className="col-span-4 text-center font-semibold text-white">
+                        <div className="col-span-3 text-center font-semibold text-white">
                           {set.weightKg ?? 0} <span className="text-[10px] text-gray-400 font-normal">kg</span>
                         </div>
                         <div className="col-span-3 text-center font-semibold text-white">
                           {set.reps ?? 0} <span className="text-[10px] text-gray-400 font-normal">reps</span>
                         </div>
-                        <div className="col-span-3 flex justify-end">
+                        <div className="col-span-2 text-center font-semibold">
+                          {set.rpe != null ? (
+                            <span className="inline-flex items-center rounded-md bg-blue-500/15 border border-blue-500/30 px-1.5 py-0.5 text-[10px] font-bold text-blue-300">
+                              {set.rpe}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">—</span>
+                          )}
+                        </div>
+                        <div className="col-span-2 flex justify-end">
                           {set.isCompleted ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
                               <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

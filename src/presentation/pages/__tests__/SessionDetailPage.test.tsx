@@ -34,6 +34,7 @@ describe('SessionDetailPage', () => {
             setNumber: 1,
             weightKg: 100,
             reps: 10,
+            rpe: 8.5,
             isCompleted: true,
           },
           {
@@ -131,6 +132,8 @@ describe('SessionDetailPage', () => {
     expect(screen.getByText('#1')).toBeInTheDocument()
     expect(screen.getByText('#2')).toBeInTheDocument()
     expect(screen.getByText('#3')).toBeInTheDocument()
+    expect(screen.getByText('RPE')).toBeInTheDocument()
+    expect(screen.getByText('8.5')).toBeInTheDocument()
     expect(screen.getAllByText('Done')).toHaveLength(2)
     expect(screen.getByText('Skipped')).toBeInTheDocument()
 

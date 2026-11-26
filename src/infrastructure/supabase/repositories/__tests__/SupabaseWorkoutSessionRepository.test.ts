@@ -27,6 +27,7 @@ describe('SupabaseWorkoutSessionRepository', () => {
               set_number: 1,
               weight_kg: 100,
               reps: 5,
+              rpe: 8,
               is_completed: true,
             },
           ],
@@ -51,6 +52,7 @@ describe('SupabaseWorkoutSessionRepository', () => {
     expect(result[0]!.title).toBe('Full Body')
     expect(result[0]!.exercises[0]!.exerciseName).toBe('Squat')
     expect(result[0]!.exercises[0]!.sets[0]!.weightKg).toBe(100)
+    expect(result[0]!.exercises[0]!.sets[0]!.rpe).toBe(8)
     expect(result[0]!.exercises[0]!.sets[0]!.isCompleted).toBe(true)
   })
 

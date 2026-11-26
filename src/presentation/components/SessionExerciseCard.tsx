@@ -1,10 +1,11 @@
 import type { SessionExercise } from '@/domain/entities/WorkoutSession'
+import type { SetUpdateData } from '@/presentation/stores/workoutSessionStore'
 import { SessionSetRow } from './SessionSetRow'
 import { formatReps } from '@/presentation/utils/formatReps'
 
 interface SessionExerciseCardProps {
   exercise: SessionExercise
-  onUpdateSet: (setNumber: number, data: { weightKg?: number; reps?: number }) => void
+  onUpdateSet: (setNumber: number, data: SetUpdateData) => void
   onToggleSetLogged: (setNumber: number) => void
   onAddSet: () => void
   onRemoveLastSet: () => void
@@ -40,10 +41,11 @@ export function SessionExerciseCard({
       </div>
 
       {/* Table Column Headers */}
-      <div className="grid grid-cols-[36px_1fr_1fr_40px] gap-2 px-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+      <div className="grid grid-cols-[32px_1fr_1fr_50px_36px] gap-1.5 px-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
         <span className="text-center">Set</span>
         <span className="text-center">Kg</span>
         <span className="text-center">Reps</span>
+        <span className="text-center">RPE</span>
         <span className="text-center">Done</span>
       </div>
 

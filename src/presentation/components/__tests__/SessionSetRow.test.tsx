@@ -91,4 +91,42 @@ describe('SessionSetRow', () => {
     const checkBtn = screen.getByRole('button', { name: /toggle set 1 logged/i })
     expect(checkBtn).toHaveClass('bg-emerald-500')
   })
+
+  it('opens RPE picker with effort descriptions and updates RPE on selection', () => {
+    const mockUpdate = vi.fn()
+    render(
+      <SessionSetRow
+        set={baseSet}
+        onUpdate={mockUpdate}
+        onToggleLogged={vi.fn()}
+      />
+    )
+
+    const rpeBtn = screen.getByRole('button', { name: /set 1 rpe/i })
+    fireEvent.click(rpeBtn)
+
+    expect(screen.getByText(/max effort \/ 0 rir/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 reps left in the tank/i)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText(/2 reps left in the tank/i))
+    expect(mockUpdate).toHaveBeenCalledWith({ rpe: 8 })
+  })
+
+  it('allows clearing an already set RPE', () => {
+    const mockUpdate = vi.fn()
+    render(
+      <SessionSetRow
+        set={{ ...baseSet, rpe: 8 }}
+        onUpdate={mockUpdate}
+        onToggleLogged={vi.fn()}
+      />
+    )
+
+    const rpeBtn = screen.getByRole('button', { name: /set 1 rpe/i })
+    expect(rpeBtn).toHaveTextContent('8')
+    fireEvent.click(rpeBtn)
+
+    fireEvent.click(screen.getByRole('button', { name: /clear rpe/i }))
+    expect(mockUpdate).toHaveBeenCalledWith({ rpe: null })
+  })
 })

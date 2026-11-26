@@ -1,6 +1,6 @@
 # Reptor PWA — MVP 1 User Stories & Progress
 
-Progress: **0 / 13 stories completed** (0%)
+Progress: **2 / 13 stories completed** (15%)
 
 ---
 
@@ -27,8 +27,8 @@ Progress: **0 / 13 stories completed** (0%)
 - [ ] **Story P14.2 — JSON Workout / Routine Importer & Validation UI**
 
 ### Epic 15 — Enhanced Workout Input (RPE, Rep Ranges & Previous Performance)
-- [ ] **Story P15.1 — RPE Input & Interactive Guide UI**
-- [ ] **Story P15.2 — Single & Range Rep Targets (Schema & UI Check)**
+- [x] **Story P15.1 — RPE Input & Interactive Guide UI**
+- [x] **Story P15.2 — Single & Range Rep Targets (Schema & UI Check)**
 - [ ] **Story P15.3 — Previous Set Performance Hints**
 
 ---
@@ -218,7 +218,7 @@ Progress: **0 / 13 stories completed** (0%)
 ## Epic 15 — Enhanced Workout Input (RPE, Rep Ranges & Previous Performance)
 
 ### Story P15.1 — RPE Input & Interactive Guide UI
-**Status**: 🔲 TODO  
+**Status**: ✅ DONE  
 **Goal**: Add optional RPE (Rate of Perceived Exertion, e.g., 6–10) logging per set with a friendly UI explaining what each RPE value means.
 
 #### Scope
@@ -233,8 +233,7 @@ Progress: **0 / 13 stories completed** (0%)
 ---
 
 ### Story P15.2 — Single & Range Rep Targets (Schema & UI Check)
-**Status**: 🔲 TODO  
-**Goal**: Support setting exercise rep targets as either a single number (e.g., `8`) or a range (e.g., `8-10`) cleanly across DB, domain, and UI.
+**Status**: ✅ DONE  
 
 #### Scope
 - Audit existing DB columns (`routine_exercises.reps_min`, `reps_max`, or equivalent) and domain types to verify whether schema changes are needed.

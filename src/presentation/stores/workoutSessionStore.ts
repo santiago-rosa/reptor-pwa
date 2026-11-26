@@ -8,6 +8,12 @@ import { SupabaseWorkoutSessionRepository } from '@/infrastructure/supabase/repo
 import { supabase } from '@/infrastructure/supabase/client'
 import { idbStorage } from './idbStorage'
 
+export interface SetUpdateData {
+  weightKg?: number
+  reps?: number
+  rpe?: number | null
+}
+
 export interface WorkoutSessionState {
   activeSession: WorkoutSession | null
   isSaving: boolean
@@ -15,7 +21,7 @@ export interface WorkoutSessionState {
 
   startFromRoutine: (routine: Routine, userId?: string | null) => void
   startEmpty: (title?: string, userId?: string | null) => void
-  updateSet: (exerciseId: string, setNumber: number, data: { weightKg?: number; reps?: number }) => void
+  updateSet: (exerciseId: string, setNumber: number, data: SetUpdateData) => void
   toggleSetLogged: (exerciseId: string, setNumber: number) => void
   addSet: (exerciseId: string) => void
   removeLastSet: (exerciseId: string) => void
@@ -50,7 +56,7 @@ export const createWorkoutSessionStore = (
           set({ activeSession: session, error: null })
         },
 
-        updateSet: (exerciseId: string, setNumber: number, data: { weightKg?: number; reps?: number }) => {
+        updateSet: (exerciseId: string, setNumber: number, data: SetUpdateData) => {
           set((state) => {
             if (!state.activeSession) return state
 
@@ -63,6 +69,7 @@ export const createWorkoutSessionStore = (
                   ...s,
                   weightKg: data.weightKg !== undefined ? Math.max(0, data.weightKg) : s.weightKg,
                   reps: data.reps !== undefined ? Math.max(0, data.reps) : s.reps,
+                  rpe: data.rpe !== undefined ? data.rpe : s.rpe,
                 }
               })
 

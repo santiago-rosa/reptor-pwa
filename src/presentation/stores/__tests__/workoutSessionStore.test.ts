@@ -76,15 +76,16 @@ describe('useWorkoutSessionStore', () => {
     expect(session.exercises[0]!.sets).toHaveLength(3)
   })
 
-  it('updates set weight and reps', () => {
+  it('updates set weight, reps, and rpe', () => {
     store.getState().startEmpty()
     store.getState().addExercise({ id: 'ex-1', name: 'Bench Press' })
 
-    store.getState().updateSet('ex-1', 1, { weightKg: 80, reps: 6 })
+    store.getState().updateSet('ex-1', 1, { weightKg: 80, reps: 6, rpe: 8.5 })
 
     const session = store.getState().activeSession!
     expect(session.exercises[0]!.sets[0]!.weightKg).toBe(80)
     expect(session.exercises[0]!.sets[0]!.reps).toBe(6)
+    expect(session.exercises[0]!.sets[0]!.rpe).toBe(8.5)
   })
 
   it('toggles set logged completion', () => {

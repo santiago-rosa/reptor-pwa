@@ -4,6 +4,7 @@ export interface SessionSet {
   setNumber: number
   weightKg: number
   reps: number
+  rpe?: number | null
   isCompleted: boolean
 }
 
