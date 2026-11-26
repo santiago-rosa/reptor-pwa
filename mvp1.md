@@ -1,6 +1,6 @@
 # Reptor PWA — MVP 1 User Stories & Progress
 
-Progress: **2 / 13 stories completed** (15%)
+Progress: **3 / 13 stories completed** (23%)
 
 ---
 
@@ -29,7 +29,7 @@ Progress: **2 / 13 stories completed** (15%)
 ### Epic 15 — Enhanced Workout Input (RPE, Rep Ranges & Previous Performance)
 - [x] **Story P15.1 — RPE Input & Interactive Guide UI**
 - [x] **Story P15.2 — Single & Range Rep Targets (Schema & UI Check)**
-- [ ] **Story P15.3 — Previous Set Performance Hints**
+- [x] **Story P15.3 — Previous Set Performance Hints**
 
 ---
 
@@ -246,7 +246,7 @@ Progress: **2 / 13 stories completed** (15%)
 ---
 
 ### Story P15.3 — Previous Set Performance Hints
-**Status**: 🔲 TODO  
+**Status**: ✅ DONE  
 **Goal**: Show the previous logged performance inline on each set (e.g., greyed `80kg@6rep@rpe7`) so the user knows what to aim for.
 
 #### Scope

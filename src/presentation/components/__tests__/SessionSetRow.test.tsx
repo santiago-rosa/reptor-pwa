@@ -129,4 +129,29 @@ describe('SessionSetRow', () => {
     fireEvent.click(screen.getByRole('button', { name: /clear rpe/i }))
     expect(mockUpdate).toHaveBeenCalledWith({ rpe: null })
   })
+
+  it('renders previous set performance hint when previousSet is provided', () => {
+    render(
+      <SessionSetRow
+        set={baseSet}
+        previousSet={{ setNumber: 1, weightKg: 80, reps: 6, rpe: 7, isCompleted: true }}
+        onUpdate={vi.fn()}
+        onToggleLogged={vi.fn()}
+      />
+    )
+
+    expect(screen.getByTestId('set-hint-1')).toHaveTextContent('Prev: 80kg × 6 @ RPE 7')
+  })
+
+  it('omits previous set hint when previousSet is undefined', () => {
+    render(
+      <SessionSetRow
+        set={baseSet}
+        onUpdate={vi.fn()}
+        onToggleLogged={vi.fn()}
+      />
+    )
+
+    expect(screen.queryByTestId('set-hint-1')).not.toBeInTheDocument()
+  })
 })

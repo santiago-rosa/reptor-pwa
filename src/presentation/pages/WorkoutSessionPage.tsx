@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWorkoutSessionStore } from '../stores/workoutSessionStore'
+import { useWorkoutHistoryStore } from '../stores/workoutHistoryStore'
 import { SessionExerciseCard } from '../components/SessionExerciseCard'
 import { SaveAsRoutineModal } from '../components/SaveAsRoutineModal'
+import { getPreviousExerciseSets } from '../utils/previousPerformance'
 import type { WorkoutSession } from '@/domain/entities/WorkoutSession'
 
 export function formatTimer(totalSeconds: number): string {
@@ -31,6 +33,13 @@ export function WorkoutSessionPage() {
   const finishSession = useWorkoutSessionStore((s) => s.finishSession)
   const isSaving = useWorkoutSessionStore((s) => s.isSaving)
   const sessionError = useWorkoutSessionStore((s) => s.error)
+
+  const historySessions = useWorkoutHistoryStore((s) => s.sessions)
+  const fetchHistorySessions = useWorkoutHistoryStore((s) => s.fetchSessions)
+
+  useEffect(() => {
+    fetchHistorySessions()
+  }, [fetchHistorySessions])
 
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false)
@@ -66,6 +75,15 @@ export function WorkoutSessionPage() {
   }, [activeSession?.startedAt])
 
   const currentSession = activeSession || completedSessionToSave
+
+  const previousSetsByExercise = useMemo(() => {
+    const map = new Map<string, ReturnType<typeof getPreviousExerciseSets>>()
+    if (!currentSession) return map
+    for (const ex of currentSession.exercises) {
+      map.set(ex.exerciseId, getPreviousExerciseSets(historySessions, ex.exerciseId, currentSession.id))
+    }
+    return map
+  }, [currentSession, historySessions])
 
   if (!currentSession) {
     return null
@@ -195,6 +213,7 @@ export function WorkoutSessionPage() {
               <SessionExerciseCard
                 key={ex.id}
                 exercise={ex}
+                previousSets={previousSetsByExercise.get(ex.exerciseId)}
                 onUpdateSet={(setNumber, data) => updateSet(ex.exerciseId, setNumber, data)}
                 onToggleSetLogged={(setNumber) => toggleSetLogged(ex.exerciseId, setNumber)}
                 onAddSet={() => addSet(ex.exerciseId)}

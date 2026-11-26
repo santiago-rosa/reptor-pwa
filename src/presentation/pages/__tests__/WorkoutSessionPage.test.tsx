@@ -3,6 +3,7 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { WorkoutSessionPage, formatTimer } from '../WorkoutSessionPage'
 import { useWorkoutSessionStore } from '../../stores/workoutSessionStore'
+import { useWorkoutHistoryStore } from '../../stores/workoutHistoryStore'
 import type { WorkoutSession } from '@/domain/entities/WorkoutSession'
 
 const mockNavigate = vi.fn()
@@ -57,6 +58,10 @@ describe('WorkoutSessionPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useWorkoutSessionStore.getState().discard()
+    useWorkoutHistoryStore.setState({
+      sessions: [],
+      fetchSessions: vi.fn(),
+    })
   })
 
   afterEach(() => {
@@ -406,5 +411,56 @@ describe('WorkoutSessionPage', () => {
     fireEvent.click(finishBtn)
 
     expect(await screen.findByText('Network error saving session')).toBeInTheDocument()
+  })
+
+  it('displays previous set performance hints for matching sets and leaves extra sets empty', () => {
+    useWorkoutHistoryStore.setState({
+      sessions: [
+        {
+          id: 'prev-session',
+          title: 'Previous Chest',
+          startedAt: '2026-11-20T10:00:00Z',
+          finishedAt: '2026-11-20T11:00:00Z',
+          exercises: [
+            {
+              id: 'se-prev',
+              exerciseId: 'ex-1',
+              exerciseName: 'Bench Press',
+              orderIndex: 0,
+              sets: [
+                { setNumber: 1, weightKg: 80, reps: 6, rpe: 7, isCompleted: true },
+              ],
+            },
+          ],
+        },
+      ],
+      fetchSessions: vi.fn(),
+    })
+
+    const twoSetSession: WorkoutSession = {
+      ...baseSession,
+      exercises: [
+        {
+          ...baseSession.exercises[0]!,
+          sets: [
+            { id: 'set-1', sessionExerciseId: 'se-1', setNumber: 1, weightKg: 82.5, reps: 6, isCompleted: false },
+            { id: 'set-2', sessionExerciseId: 'se-1', setNumber: 2, weightKg: 82.5, reps: 6, isCompleted: false },
+          ],
+        },
+      ],
+    }
+
+    useWorkoutSessionStore.setState({ activeSession: twoSetSession })
+
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByTestId('set-hint-1')).toHaveTextContent('Prev: 80kg × 6 @ RPE 7')
+    expect(screen.queryByTestId('set-hint-2')).not.toBeInTheDocument()
   })
 })

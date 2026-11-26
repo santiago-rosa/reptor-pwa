@@ -1,10 +1,11 @@
-import type { SessionExercise } from '@/domain/entities/WorkoutSession'
+import type { SessionExercise, SessionSet } from '@/domain/entities/WorkoutSession'
 import type { SetUpdateData } from '@/presentation/stores/workoutSessionStore'
 import { SessionSetRow } from './SessionSetRow'
 import { formatReps } from '@/presentation/utils/formatReps'
 
 interface SessionExerciseCardProps {
   exercise: SessionExercise
+  previousSets?: Map<number, SessionSet>
   onUpdateSet: (setNumber: number, data: SetUpdateData) => void
   onToggleSetLogged: (setNumber: number) => void
   onAddSet: () => void
@@ -13,6 +14,7 @@ interface SessionExerciseCardProps {
 
 export function SessionExerciseCard({
   exercise,
+  previousSets,
   onUpdateSet,
   onToggleSetLogged,
   onAddSet,
@@ -55,6 +57,7 @@ export function SessionExerciseCard({
           <SessionSetRow
             key={set.id}
             set={set}
+            previousSet={previousSets?.get(set.setNumber)}
             onUpdate={(data) => onUpdateSet(set.setNumber, data)}
             onToggleLogged={() => onToggleSetLogged(set.setNumber)}
           />
