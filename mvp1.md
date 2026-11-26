@@ -1,6 +1,6 @@
 # Reptor PWA — MVP 1 User Stories & Progress
 
-Progress: **3 / 13 stories completed** (23%)
+Progress: **4 / 13 stories completed** (31%)
 
 ---
 
@@ -23,7 +23,7 @@ Progress: **3 / 13 stories completed** (23%)
 - [ ] **Story P13.2 — Offline Status Indicator & Sync Feedback UI**
 
 ### Epic 14 — AI-Assisted JSON Workout Import
-- [ ] **Story P14.1 — AI Exercise Catalog & JSON Schema Endpoint / Prompt**
+- [x] **Story P14.1 — AI Exercise Catalog & JSON Schema Endpoint / Prompt**
 - [ ] **Story P14.2 — JSON Workout / Routine Importer & Validation UI**
 
 ### Epic 15 — Enhanced Workout Input (RPE, Rep Ranges & Previous Performance)
@@ -187,7 +187,7 @@ Progress: **3 / 13 stories completed** (23%)
 ## Epic 14 — AI-Assisted JSON Workout Import
 
 ### Story P14.1 — AI Exercise Catalog & JSON Schema Endpoint / Prompt
-**Status**: 🔲 TODO  
+**Status**: ✅ DONE  
 **Goal**: Provide a machine-readable endpoint (or copyable AI prompt + live exercise catalog) so any external AI knows exact exercise IDs/names and the expected JSON schema.
 
 #### Scope
@@ -195,8 +195,8 @@ Progress: **3 / 13 stories completed** (23%)
 - Optional in-app "Copy AI Prompt" helper that bundles the schema + exercise list for quick pasting into any AI chat.
 
 #### Acceptance Criteria
-- [ ] External AI can fetch or receive the exact JSON format and valid exercise names/IDs.
-- [ ] Schema supports routine/workout name, exercises, sets, and rep targets (single or range).
+- [x] External AI can fetch or receive the exact JSON format and valid exercise names/IDs.
+- [x] Schema supports routine/workout name, exercises, sets, and rep targets (single or range).
 
 ---
 
