@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useRoutineStore } from '../stores/routineStore'
 import { usePlanStore } from '../stores/planStore'
+import { useExerciseStore } from '../stores/exerciseStore'
 import { useWorkoutSessionStore } from '../stores/workoutSessionStore'
 import { RoutineCard } from '../components/RoutineCard'
 import { PlanFolderCard } from '../components/PlanFolderCard'
 import { RoutineContextMenu } from '../components/RoutineContextMenu'
 import { CreatePlanModal } from '../components/CreatePlanModal'
 import { AssignPlanModal } from '../components/AssignPlanModal'
+import { ImportRoutineModal } from '../components/ImportRoutineModal'
 import { EmptyState } from '../components/EmptyState'
 import type { Routine } from '@/domain/entities/Routine'
 import type { Plan } from '@/domain/entities/Plan'
+import type { CreateRoutineInput } from '@/domain/repositories/IRoutineRepository'
 
 export function RoutineLibraryPage() {
   const navigate = useNavigate()
@@ -19,11 +22,13 @@ export function RoutineLibraryPage() {
   const [planToEdit, setPlanToEdit] = useState<Plan | null>(null)
   const [planToDelete, setPlanToDelete] = useState<Plan | null>(null)
   const [routineForAssign, setRoutineForAssign] = useState<Routine | null>(null)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
 
   const routines = useRoutineStore((s) => s.routines)
   const routinesLoading = useRoutineStore((s) => s.loading)
   const routinesError = useRoutineStore((s) => s.error)
   const fetchRoutines = useRoutineStore((s) => s.fetchRoutines)
+  const createRoutine = useRoutineStore((s) => s.createRoutine)
   const deleteRoutine = useRoutineStore((s) => s.deleteRoutine)
   const removeFromPlan = useRoutineStore((s) => s.removeFromPlan)
   const assignRoutineToPlan = useRoutineStore((s) => s.assignRoutineToPlan)
@@ -34,6 +39,10 @@ export function RoutineLibraryPage() {
   const createPlan = usePlanStore((s) => s.createPlan)
   const renamePlan = usePlanStore((s) => s.renamePlan)
   const deletePlan = usePlanStore((s) => s.deletePlan)
+
+  const exercises = useExerciseStore((s) => s.exercises)
+  const exercisesLoading = useExerciseStore((s) => s.loading)
+  const fetchExercises = useExerciseStore((s) => s.fetchExercises)
 
   const startFromRoutine = useWorkoutSessionStore((s) => s.startFromRoutine)
   const startEmpty = useWorkoutSessionStore((s) => s.startEmpty)
@@ -97,6 +106,19 @@ export function RoutineLibraryPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              fetchExercises()
+              setIsImportModalOpen(true)
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 text-xs font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition"
+          >
+            <svg className="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -270,6 +292,24 @@ export function RoutineLibraryPage() {
         onCreateNewPlan={() => {
           setPlanToEdit(null)
           setIsPlanModalOpen(true)
+        }}
+      />
+
+      {/* Import Routine JSON Modal */}
+      <ImportRoutineModal
+        isOpen={isImportModalOpen}
+        exercises={exercises}
+        exercisesLoading={exercisesLoading}
+        onClose={() => setIsImportModalOpen(false)}
+        onSaveRoutines={async (inputs: CreateRoutineInput[]) => {
+          for (const input of inputs) {
+            await createRoutine(input)
+          }
+        }}
+        onSaveAndStartRoutine={async (input: CreateRoutineInput) => {
+          const created = await createRoutine(input)
+          startFromRoutine(created)
+          navigate('/session')
         }}
       />
 
