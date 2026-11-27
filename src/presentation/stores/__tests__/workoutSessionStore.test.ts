@@ -155,4 +155,49 @@ describe('useWorkoutSessionStore', () => {
     store.getState().addExercise({ id: 'ex-2', name: 'Squat' })
     expect(store.getState().activeSession!.exercises).toHaveLength(2)
   })
+
+  it('rehydrates active session from async storage and sets _hasHydrated', async () => {
+    const asyncMap = new Map<string, string>()
+    const asyncStorage: StateStorage = {
+      getItem: async (name) => asyncMap.get(name) ?? null,
+      setItem: async (name, val) => {
+        asyncMap.set(name, val)
+      },
+      removeItem: async (name) => {
+        asyncMap.delete(name)
+      },
+    }
+
+    const firstStore = createWorkoutSessionStore(
+      {
+        startSession: new StartSession(),
+        finishSession: new FinishSession(mockRepo),
+      },
+      asyncStorage
+    )
+    firstStore.getState().startEmpty('Leg Day')
+    firstStore.getState().addExercise({ id: 'ex-squat', name: 'Squat' })
+    firstStore.getState().updateSet('ex-squat', 1, { weightKg: 100, reps: 5 })
+
+    // Wait for async persist write
+    await new Promise((r) => setTimeout(r, 10))
+
+    // Simulate reopening app with a fresh store instance reading the same storage
+    const reopenedStore = createWorkoutSessionStore(
+      {
+        startSession: new StartSession(),
+        finishSession: new FinishSession(mockRepo),
+      },
+      asyncStorage
+    )
+
+    await vi.waitFor(() => {
+      expect(reopenedStore.getState()._hasHydrated).toBe(true)
+    })
+
+    const restored = reopenedStore.getState().activeSession
+    expect(restored?.title).toBe('Leg Day')
+    expect(restored?.exercises[0]?.sets[0]?.weightKg).toBe(100)
+    expect(restored?.exercises[0]?.sets[0]?.reps).toBe(5)
+  })
 })

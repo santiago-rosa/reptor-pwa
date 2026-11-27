@@ -18,7 +18,9 @@ export interface WorkoutSessionState {
   activeSession: WorkoutSession | null
   isSaving: boolean
   error: string | null
+  _hasHydrated: boolean
 
+  setHasHydrated: (hydrated: boolean) => void
   startFromRoutine: (routine: Routine, userId?: string | null) => void
   startEmpty: (title?: string, userId?: string | null) => void
   updateSet: (exerciseId: string, setNumber: number, data: SetUpdateData) => void
@@ -45,6 +47,11 @@ export const createWorkoutSessionStore = (
         activeSession: null,
         isSaving: false,
         error: null,
+        _hasHydrated: false,
+
+        setHasHydrated: (hydrated: boolean) => {
+          set({ _hasHydrated: hydrated })
+        },
 
         startFromRoutine: (routine: Routine, userId?: string | null) => {
           const session = usecases.startSession.execute({ routine, userId })
@@ -205,6 +212,9 @@ export const createWorkoutSessionStore = (
         name: 'workout-session',
         storage: createJSONStorage(() => customStorage),
         partialize: (state) => ({ activeSession: state.activeSession } as WorkoutSessionState),
+        onRehydrateStorage: () => (state) => {
+          state?.setHasHydrated(true)
+        },
       }
     )
   )

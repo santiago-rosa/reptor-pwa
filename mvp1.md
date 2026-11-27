@@ -1,6 +1,6 @@
 # Reptor PWA — MVP 1 User Stories & Progress
 
-Progress: **5 / 13 stories completed** (38%)
+Progress: **6 / 17 stories completed** (35%)
 
 ---
 
@@ -19,8 +19,12 @@ Progress: **5 / 13 stories completed** (38%)
 - [ ] **Story P12.2 — AI Analysis UI on Progress Page**
 
 ### Epic 13 — Real Offline Sync & Queue
-- [ ] **Story P13.1 — Offline Workout Queue & Sync Engine**
-- [ ] **Story P13.2 — Offline Status Indicator & Sync Feedback UI**
+- [x] **Story P13.1 — Active Workout Session Persistence & Resume Recovery**
+- [ ] **Story P13.2 — Offline Read Cache & Offline-Safe Auth**
+- [ ] **Story P13.3 — Offline Workout Queue (Finish Offline)**
+- [ ] **Story P13.4 — Auto-Sync Engine & Idempotent Retries**
+- [ ] **Story P13.5 — Offline Status Indicator & Sync Feedback UI**
+- [ ] **Story P13.6 — PWA Offline App Shell & Route Verification**
 
 ### Epic 14 — AI-Assisted JSON Workout Import
 - [x] **Story P14.1 — AI Exercise Catalog & JSON Schema Endpoint / Prompt**
@@ -153,34 +157,90 @@ Progress: **5 / 13 stories completed** (38%)
 
 ## Epic 13 — Real Offline Sync & Queue
 
-### Story P13.1 — Offline Workout Queue & Sync Engine
-**Status**: 🔲 TODO  
-**Goal**: Allow finishing and saving workouts while offline, persisting them in a local IndexedDB queue and automatically syncing to Supabase when connectivity returns.
+### Story P13.1 — Active Workout Session Persistence & Resume Recovery
+**Status**: ✅ DONE  
+**Goal**: Ensure an in-progress workout is never lost when closing/reopening the browser tab or PWA, and can always be resumed from anywhere in the app.
 
 #### Scope
-- Persist pending completed sessions in IndexedDB (`idb-keyval`) when offline or when a save fails due to network loss.
-- Listen to browser `online` / `offline` events (and app startup) to flush the pending sync queue to `SupabaseWorkoutSessionRepository`.
-- Ensure idempotent saves (no duplicate sessions on retry) and merge pending local sessions into workout history until synced.
+- Track hydration state (`_hasHydrated`) on `useWorkoutSessionStore` (`persist` `onRehydrateStorage`) so `WorkoutSessionPage` waits for `idbStorage` rehydration before redirecting when `activeSession` is `null`.
+- Add a persistent **"Workout in progress — Resume"** banner in `AppLayout` whenever `activeSession` is present, allowing the user to jump back into `/session` with all weights, reps, RPE, and timer intact.
 
 #### Acceptance Criteria
-- [ ] Finishing a workout offline succeeds locally without losing data.
+- [x] Reloading or closing/reopening `/session` restores the active workout without redirecting to `/routines`.
+- [x] Reopening the app at `/` or `/routines` while a workout is active shows a visible Resume banner that navigates back to `/session`.
+
+---
+
+### Story P13.2 — Offline Read Cache & Offline-Safe Auth
+**Status**: 🔲 TODO  
+**Goal**: Allow opening the app offline and viewing/starting existing routines, plans, exercises, and workout history from local cache.
+
+#### Scope
+- Persist `routineStore`, `planStore`, `exerciseStore`, and `workoutHistoryStore` via `idbStorage` (IndexedDB with `localStorage` fallback).
+- Preserve cached data when network fetches fail offline instead of wiping state or blocking the UI.
+- Ensure `authStore` / `RequireAuth` preserves the cached user session when offline so the user is not redirected to `/login` on a network error.
+
+#### Acceptance Criteria
+- [ ] Opening the app offline displays previously loaded routines, plans, exercises, and workout history.
+- [ ] User can start an existing routine and log sets, weights, reps, and RPE while offline.
+
+---
+
+### Story P13.3 — Offline Workout Queue (Finish Offline)
+**Status**: 🔲 TODO  
+**Goal**: Allow finishing a workout while offline, saving it locally in a pending queue and showing it immediately in workout history.
+
+#### Scope
+- Create `offlineQueueStore` (persisted via `idbStorage`) storing completed `WorkoutSession` items awaiting upload.
+- Update `workoutSessionStore.finishSession()` so that if offline (`!navigator.onLine`) or if saving fails due to a network error, the session (with `finishedAt` set) is queued locally, `activeSession` is cleared, and navigation proceeds normally.
+- Merge queued sessions into `WorkoutHistoryPage`, `SessionDetailPage`, and previous-performance hints immediately.
+
+#### Acceptance Criteria
+- [ ] Finishing a workout offline succeeds locally without losing data or getting stuck on `/session`.
+- [ ] Queued workouts appear immediately in History and contribute to Previous Performance hints.
+
+---
+
+### Story P13.4 — Auto-Sync Engine & Idempotent Retries
+**Status**: 🔲 TODO  
+**Goal**: Automatically sync queued workouts to Supabase when connectivity returns, without creating duplicates.
+
+#### Scope
+- Flush pending sessions sequentially to `SupabaseWorkoutSessionRepository.save()` on `window` `online` events, on app startup (when online and authenticated), and on manual trigger.
+- Ensure idempotent upserts (no duplicate sessions/exercises/sets on retry) and remove each item from the queue once confirmed saved.
+- Refresh `workoutHistoryStore` after syncing.
+
+#### Acceptance Criteria
 - [ ] Pending workouts automatically upload to Supabase once connection is restored.
 - [ ] Retrying a failed sync never creates duplicate database rows.
 
 ---
 
-### Story P13.2 — Offline Status Indicator & Sync Feedback UI
+### Story P13.5 — Offline Status Indicator & Sync Feedback UI
 **Status**: 🔲 TODO  
-**Goal**: Give clear visual feedback when the app is offline, when workouts are queued locally, and when syncing completes.
+**Goal**: Give clear visual feedback when the app is offline, when workouts are queued locally, and when syncing completes or fails.
 
 #### Scope
-- Subtle offline/syncing banner or status pill in `AppLayout` / `WorkoutHistoryPage`.
-- Show "Pending sync" badge on locally queued sessions in history.
-- Manual "Sync now" retry button if a sync failed.
+- Add `useOnlineStatus` / global status pill or banner in `AppLayout` showing offline mode, syncing progress, and pending sync count.
+- Show a `"Pending sync"` badge on locally queued sessions in `WorkoutHistoryPage` and `SessionDetailPage`.
+- Add a manual `"Sync now"` retry button if a sync failed.
 
 #### Acceptance Criteria
 - [ ] User can clearly see offline status and pending sync count.
-- [ ] Queued workouts appear in history immediately even before reaching Supabase.
+- [ ] Failed syncs surface a `"Sync now"` retry action.
+
+---
+
+### Story P13.6 — PWA Offline App Shell & Route Verification
+**Status**: 🔲 TODO  
+**Goal**: Ensure the installed PWA loads its app shell and any SPA route cleanly when launched offline.
+
+#### Scope
+- Verify `vite-plugin-pwa` Workbox configuration (`navigateFallback`, precache patterns) for offline SPA routing.
+- Verify production build (`npm run build`) generates the service worker with expected assets.
+
+#### Acceptance Criteria
+- [ ] Production build precaches app shell assets and supports offline navigation fallback.
 
 ---
 

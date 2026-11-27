@@ -25,6 +25,7 @@ export function formatTimer(totalSeconds: number): string {
 export function WorkoutSessionPage() {
   const navigate = useNavigate()
   const activeSession = useWorkoutSessionStore((s) => s.activeSession)
+  const hasHydrated = useWorkoutSessionStore((s) => s._hasHydrated)
   const discard = useWorkoutSessionStore((s) => s.discard)
   const updateSet = useWorkoutSessionStore((s) => s.updateSet)
   const toggleSetLogged = useWorkoutSessionStore((s) => s.toggleSetLogged)
@@ -52,12 +53,13 @@ export function WorkoutSessionPage() {
     return Math.max(0, Math.floor((Date.now() - start) / 1000))
   })
 
-  // Redirect to /routines if no active session
+  // Redirect to /routines if no active session (only after storage rehydration finishes)
   useEffect(() => {
+    if (!hasHydrated) return
     if (!activeSession && !completedSessionToSave) {
       navigate('/routines', { replace: true })
     }
-  }, [activeSession, completedSessionToSave, navigate])
+  }, [hasHydrated, activeSession, completedSessionToSave, navigate])
 
   // Live timer tick from startedAt
   useEffect(() => {

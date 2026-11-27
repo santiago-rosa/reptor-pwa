@@ -58,6 +58,7 @@ describe('WorkoutSessionPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useWorkoutSessionStore.getState().discard()
+    useWorkoutSessionStore.setState({ _hasHydrated: true })
     useWorkoutHistoryStore.setState({
       sessions: [],
       fetchSessions: vi.fn(),
@@ -68,7 +69,20 @@ describe('WorkoutSessionPage', () => {
     vi.useRealTimers()
   })
 
-  it('redirects to /routines if active session is null', () => {
+  it('does not redirect to /routines while storage is still hydrating', () => {
+    useWorkoutSessionStore.setState({ activeSession: null, _hasHydrated: false })
+    render(
+      <MemoryRouter initialEntries={['/session']}>
+        <Routes>
+          <Route path="/session" element={<WorkoutSessionPage />} />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('redirects to /routines if active session is null after hydration', () => {
     render(
       <MemoryRouter initialEntries={['/session']}>
         <Routes>
